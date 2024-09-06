@@ -153,36 +153,30 @@ shape: (2_430, 8)
 
 
 # Get live game data
-game_data = scraper.get_data(game_list_input=[745042])
+game_data = scraper.get_data(game_list_input=[745444,746175])
 
 # Convert game data to DataFrame
 data_df = scraper.get_data_df(data_list=game_data)
 print(data_df)
 
-shape: (245, 78)
+shape: (690, 78)
 ┌─────────┬────────────┬───────────┬──────────────┬───┬────────────┬─────┬────────────┬────────────┐
 │ game_id ┆ game_date  ┆ batter_id ┆ batter_name  ┆ … ┆ event_type ┆ rbi ┆ away_score ┆ home_score │
 │ ---     ┆ ---        ┆ ---       ┆ ---          ┆   ┆ ---        ┆ --- ┆ ---        ┆ ---        │
 │ i64     ┆ str        ┆ i64       ┆ str          ┆   ┆ str        ┆ f64 ┆ f64        ┆ f64        │
 ╞═════════╪════════════╪═══════════╪══════════════╪═══╪════════════╪═════╪════════════╪════════════╡
-│ 745042  ┆ 2024-09-05 ┆ 663616    ┆ Trevor       ┆ … ┆ NaN        ┆ NaN ┆ NaN        ┆ NaN        │
-│         ┆            ┆           ┆ Larnach      ┆   ┆            ┆     ┆            ┆            │
-│ 745042  ┆ 2024-09-05 ┆ 663616    ┆ Trevor       ┆ … ┆ NaN        ┆ NaN ┆ NaN        ┆ NaN        │
-│         ┆            ┆           ┆ Larnach      ┆   ┆            ┆     ┆            ┆            │
-│ 745042  ┆ 2024-09-05 ┆ 663616    ┆ Trevor       ┆ … ┆ NaN        ┆ NaN ┆ NaN        ┆ NaN        │
-│         ┆            ┆           ┆ Larnach      ┆   ┆            ┆     ┆            ┆            │
-│ 745042  ┆ 2024-09-05 ┆ 663616    ┆ Trevor       ┆ … ┆ NaN        ┆ NaN ┆ NaN        ┆ NaN        │
-│         ┆            ┆           ┆ Larnach      ┆   ┆            ┆     ┆            ┆            │
-│ 745042  ┆ 2024-09-05 ┆ 663616    ┆ Trevor       ┆ … ┆ strikeout  ┆ 0.0 ┆ 0.0        ┆ 0.0        │
-│         ┆            ┆           ┆ Larnach      ┆   ┆            ┆     ┆            ┆            │
+│ 745444  ┆ 2024-03-20 ┆ 605141    ┆ Mookie Betts ┆ … ┆ NaN        ┆ NaN ┆ NaN        ┆ NaN        │
+│ 745444  ┆ 2024-03-20 ┆ 605141    ┆ Mookie Betts ┆ … ┆ NaN        ┆ NaN ┆ NaN        ┆ NaN        │
+│ 745444  ┆ 2024-03-20 ┆ 605141    ┆ Mookie Betts ┆ … ┆ NaN        ┆ NaN ┆ NaN        ┆ NaN        │
+│ 745444  ┆ 2024-03-20 ┆ 605141    ┆ Mookie Betts ┆ … ┆ NaN        ┆ NaN ┆ NaN        ┆ NaN        │
+│ 745444  ┆ 2024-03-20 ┆ 605141    ┆ Mookie Betts ┆ … ┆ walk       ┆ 0.0 ┆ 0.0        ┆ 0.0        │
 │ …       ┆ …          ┆ …         ┆ …            ┆ … ┆ …          ┆ …   ┆ …          ┆ …          │
-│ 745042  ┆ 2024-09-05 ┆ 670764    ┆ Taylor Walls ┆ … ┆ NaN        ┆ NaN ┆ NaN        ┆ NaN        │
-│ 745042  ┆ 2024-09-05 ┆ 670764    ┆ Taylor Walls ┆ … ┆ NaN        ┆ NaN ┆ NaN        ┆ NaN        │
-│ 745042  ┆ 2024-09-05 ┆ 670764    ┆ Taylor Walls ┆ … ┆ NaN        ┆ NaN ┆ NaN        ┆ NaN        │
-│ 745042  ┆ 2024-09-05 ┆ 670764    ┆ Taylor Walls ┆ … ┆ strikeout  ┆ 0.0 ┆ 4.0        ┆ 3.0        │
-│ 745042  ┆ 2024-09-05 ┆ 642350    ┆ Jose Siri    ┆ … ┆ field_out  ┆ 0.0 ┆ 4.0        ┆ 3.0        │
+│ 746175  ┆ 2024-03-21 ┆ 669257    ┆ Will Smith   ┆ … ┆ NaN        ┆ NaN ┆ NaN        ┆ NaN        │
+│ 746175  ┆ 2024-03-21 ┆ 669257    ┆ Will Smith   ┆ … ┆ field_out  ┆ 0.0 ┆ 15.0       ┆ 11.0       │
+│ 746175  ┆ 2024-03-21 ┆ 571970    ┆ Max Muncy    ┆ … ┆ NaN        ┆ NaN ┆ NaN        ┆ NaN        │
+│ 746175  ┆ 2024-03-21 ┆ 571970    ┆ Max Muncy    ┆ … ┆ NaN        ┆ NaN ┆ NaN        ┆ NaN        │
+│ 746175  ┆ 2024-03-21 ┆ 571970    ┆ Max Muncy    ┆ … ┆ strikeout  ┆ 0.0 ┆ 15.0       ┆ 11.0       │
 └─────────┴────────────┴───────────┴──────────────┴───┴────────────┴─────┴────────────┴────────────┘
-
 ```
 
 ## License
