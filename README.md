@@ -1,6 +1,6 @@
 # MLB Scraper
 
-This Python module provides a class `MLB_Scrape` that interacts with the MLB API to retrieve various types of baseball-related data. The data is processed and returned as Polars DataFrames for easy manipulation and analysis.
+This Python module provides a class `MLB_Scrape` that interacts with the MLB Stats API to retrieve various types of baseball-related data. The data is processed and returned as Polars DataFrames for easy manipulation and analysis.
 
 ## Requirements
 
