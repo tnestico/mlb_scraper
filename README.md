@@ -151,7 +151,6 @@ shape: (2_430, 8)
 │         ┆          ┆            ┆ Padres        ┆ Diamondbacks ┆       ┆          ┆              │
 └─────────┴──────────┴────────────┴───────────────┴──────────────┴───────┴──────────┴──────────────┘
 
-
 # Get live game data
 game_data = scraper.get_data(game_list_input=[745444,746175])
 
