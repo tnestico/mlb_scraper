@@ -315,9 +315,6 @@ class MLB_Scrape:
                         pitch_description.append(ab_list['playEvents'][n]['details']['type']['description'] if 'type' in ab_list['playEvents'][n]['details'] else np.nan)
 
                         if ab_list['playEvents'][n]['pitchNumber'] == 1:
-                            print(ab_list['playEvents'][n])
-                            
-                            #ab_number.append(ab_list['playEvents'][n]['atBatIndex'] if 'atBatIndex' in ab_list['playEvents'][n] else np.nan)
                             strikes.append(0)
                             balls.append(0)
                             strikes_after.append(ab_list['playEvents'][n]['count']['strikes'] if 'strikes' in ab_list['playEvents'][n]['count'] else np.nan)
@@ -326,7 +323,6 @@ class MLB_Scrape:
                             outs_after.append(ab_list['playEvents'][n]['count']['outs'] if 'outs' in ab_list['playEvents'][n]['count'] else np.nan)
 
                         else:
-                            #ab_number.append(ab_list['playEvents'][n]['atBatIndex'] if 'atBatIndex' in ab_list['playEvents'][n] else np.nan)
                             strikes.append(ab_list['playEvents'][n-1]['count']['strikes'] if 'strikes' in ab_list['playEvents'][n-1]['count'] else np.nan)
                             balls.append(ab_list['playEvents'][n-1]['count']['balls'] if 'balls' in ab_list['playEvents'][n-1]['count'] else np.nan)
                             outs.append(ab_list['playEvents'][n-1]['count']['outs'] if 'outs' in ab_list['playEvents'][n-1]['count'] else np.nan)
