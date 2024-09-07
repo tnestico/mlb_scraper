@@ -544,7 +544,7 @@ class MLB_Scrape:
                         away_score.append(np.nan)
                         home_score.append(np.nan)
                         is_out.append(np.nan)
-                        ab_number.append(np.nan)
+                        
         # print({
         #     'game_id':len(game_id),
         #     'game_date':len(game_date),
