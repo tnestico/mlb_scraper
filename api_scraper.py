@@ -816,19 +816,27 @@ class MLB_Scrape:
 
         return leagues_df
 
-    def get_player_games_list(self, player_id: int, season: int):
+    def get_player_games_list(self, player_id: int, season: int, start_date: str = None, end_date: str = None):
         """
         Retrieves a list of game IDs for a specific player in a given season.
         
         Parameters:
         - player_id (int): The ID of the player.
         - season (int): The season year for which to retrieve the game list.
+        - start_date (str): The start date of the season (default is January 1st of the specified season).
+        - end_date (str): The end date of the season (default is December 31st of the specified season).
         
         Returns:
         - player_game_list (list): A list of game IDs in which the player participated during the specified season.
         """
+        # Set default start and end dates if not provided
+        if not start_date:
+            start_date = f'{season}-01-01'
+        if not end_date:
+            end_date = f'{season}-12-31'
+
         # Make API call to retrieve player game logs
-        response = requests.get(url=f'http://statsapi.mlb.com/api/v1/people/{player_id}?hydrate=stats(type=gameLog,season={season}),hydrations').json()
+        response = requests.get(url=f'http://statsapi.mlb.com/api/v1/people/{player_id}?hydrate=stats(type=gameLog,season={season},startDate={start_date},endDate={end_date}),hydrations').json()
         
         # Extract game IDs from the API response
         player_game_list = [x['game']['gamePk'] for x in response['people'][0]['stats'][0]['splits']]
@@ -877,4 +885,3 @@ class MLB_Scrape:
                                         'birthDate':birthDate_list})
               
         return df
-
