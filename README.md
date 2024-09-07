@@ -5,6 +5,7 @@ This Python module provides a class `MLB_Scrape` that interacts with the MLB Sta
 ## Requirements
 
 - Python 3.x
+- `re` library
 - `requests` library
 - `polars` library
 - `numpy` library
