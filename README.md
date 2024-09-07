@@ -86,10 +86,10 @@ Retrieves the different types of MLB games from the MLB API and processes them i
 
 Retrieves data frame of players in a given league
 
-**Parameters**:
-  - sport_id (int): The ID of the sport for which to retrieve player data.
+- **Parameters**:
+  - `sport_id` (int): The ID of the sport for which to retrieve player data.
 
-- **Returns**: player_df (pl.DataFrame): A DataFrame containing player information, including player ID, name, position, team, and age.
+- **Returns**: `pl.DataFrame`: A DataFrame containing player information, including player ID, name, position, team, and age.
 
 ## Usage
 ```python
