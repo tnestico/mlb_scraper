@@ -82,7 +82,7 @@ Retrieves the different types of MLB games from the MLB API and processes them i
 
 - **Returns**: `pl.DataFrame` - A DataFrame containing the game types information.
 
-#### `get_players(self)`
+#### `get_players(self, sport_id: int)`
 
 Retrieves data frame of players in a given league
 
