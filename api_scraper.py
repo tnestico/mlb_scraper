@@ -834,3 +834,47 @@ class MLB_Scrape:
         player_game_list = [x['game']['gamePk'] for x in response['people'][0]['stats'][0]['splits']]
         
         return player_game_list
+    
+
+    def get_players(self, sport_id: int):
+        """
+        Retrieves data frame of players in a given league
+
+        Parameters:
+        - sport_id (int): The ID of the sport for which to retrieve player data.
+
+        Returns:
+        - player_df (pl.DataFrame): A DataFrame containing player information, including player ID, name, position, team, and age.
+        """
+    
+        player_data = requests.get(url=f'https://statsapi.mlb.com/api/v1/sports/{sport_id}/players').json()
+
+        #Select relevant data that will help distinguish players from one another
+
+        fullName_list = [x['fullName'] for x in player_data['people']]
+        firstName_list = [x['firstName'] for x in player_data['people']]
+        lastName_list = [x['lastName'] for x in player_data['people']]
+        id_list = [x['id'] for x in player_data['people']]
+        position_list = [x['primaryPosition']['abbreviation'] for x in player_data['people']]
+        team_list = [x['currentTeam']['id']for x in player_data['people']]
+        weight_list = [x['weight'] for x in player_data['people']]
+        height_list = [x['height'] for x in player_data['people']]
+        age_list = [x['currentAge']for x in player_data['people']]
+        birthDate_list = [x['birthDate']for x in player_data['people']]
+
+
+
+
+        df = pl.DataFrame(data={'player_id':id_list,
+                                        'first_name':firstName_list,
+                                        'last_name':lastName_list,
+                                        'name':fullName_list,
+                                        'position':position_list,
+                                        'team':team_list,
+                                        'weight':weight_list,
+                                        'height':height_list,
+                                        'age':age_list,
+                                        'birthDate':birthDate_list})
+              
+        return df
+
