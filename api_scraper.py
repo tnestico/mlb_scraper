@@ -4,6 +4,7 @@ import numpy as np
 from datetime import datetime
 from tqdm import tqdm
 from pytz import timezone
+import re
 
 
 class MLB_Scrape:
@@ -823,17 +824,28 @@ class MLB_Scrape:
         Parameters:
         - player_id (int): The ID of the player.
         - season (int): The season year for which to retrieve the game list.
-        - start_date (str): The start date of the season (default is January 1st of the specified season).
-        - end_date (str): The end date of the season (default is December 31st of the specified season).
+        - start_date (str): The start date (YYYY-MM-DD) of the range (default is January 1st of the specified season).
+        - end_date (str): The end date (YYYY-MM-DD)  of the range (default is December 31st of the specified season).
         
         Returns:
         - player_game_list (list): A list of game IDs in which the player participated during the specified season.
         """
         # Set default start and end dates if not provided
+
         if not start_date:
             start_date = f'{season}-01-01'
         if not end_date:
             end_date = f'{season}-12-31'
+
+
+
+        # Validate date format
+        date_pattern = re.compile(r'^\d{4}-\d{2}-\d{2}$')
+        if not date_pattern.match(start_date):
+            raise ValueError(f"start_date {start_date} is not in YYYY-MM-DD format")
+        if not date_pattern.match(end_date):
+            raise ValueError(f"end_date {end_date} is not in YYYY-MM-DD format")
+    
 
         # Make API call to retrieve player game logs
         response = requests.get(url=f'http://statsapi.mlb.com/api/v1/people/{player_id}?hydrate=stats(type=gameLog,season={season},startDate={start_date},endDate={end_date}),hydrations').json()
@@ -885,3 +897,4 @@ class MLB_Scrape:
                                         'birthDate':birthDate_list})
               
         return df
+
