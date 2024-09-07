@@ -62,12 +62,14 @@ Retrieves information about MLB leagues from the MLB API and processes it into a
 
 - **Returns**: `pl.DataFrame` - A DataFrame containing league information, including league ID, league name, league abbreviation, and sport ID.
 
-#### `get_player_games_list(self, player_id: int, season: int)`
+#### `get_player_games_list(self, player_id: int, season: int, start_date: str=None, end_date: str=None))`
 Retrieves a list of game IDs for a specific player in a given season.
 
 - **Parameters**:
   - `player_id` (int): The ID of the player.
   - `season` (int): The season year for which to retrieve the game list.
+  - `start_date` (str): The start date (YYYY-MM-DD) of the range (default is January 1st of the specified season).
+  - `end_date` (str): The end date (YYYY-MM-DD)  of the range (default is December 31st of the specified season).
 - **Returns**: `list` - A list of game IDs in which the player participated during the specified season.
 
 #### `get_data_df(self, data_list: list)`
