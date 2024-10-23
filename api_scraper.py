@@ -817,7 +817,7 @@ class MLB_Scrape:
 
         return leagues_df
 
-    def get_player_games_list(self, player_id: int, season: int, start_date: str = None, end_date: str = None, sport_id: int = 1):
+    def get_player_games_list(self, player_id: int, season: int, start_date: str = None, end_date: str = None, sport_id: int = 1, game_type: list = ['R']):):
         """
         Retrieves a list of game IDs for a specific player in a given season.
         
@@ -827,6 +827,7 @@ class MLB_Scrape:
         - start_date (str): The start date (YYYY-MM-DD) of the range (default is January 1st of the specified season).
         - end_date (str): The end date (YYYY-MM-DD)  of the range (default is December 31st of the specified season).
         - sport_id (int): The ID of the sport for which to retrieve player data.
+        - game_type (list): A list of game types to filter the schedule. Default is ['R'].
         
         Returns:
         - player_game_list (list): A list of game IDs in which the player participated during the specified season.
@@ -846,16 +847,17 @@ class MLB_Scrape:
             raise ValueError(f"start_date {start_date} is not in YYYY-MM-DD format")
         if not date_pattern.match(end_date):
             raise ValueError(f"end_date {end_date} is not in YYYY-MM-DD format")
-    
+
+        game_type_str = ','.join([str(x) for x in game_type])
 
         # Make API call to retrieve player game logs
-        response = requests.get(url=f'http://statsapi.mlb.com/api/v1/people/{player_id}?hydrate=stats(type=gameLog,season={season},startDate={start_date},endDate={end_date},sportId={sport_id}),hydrations').json()
+        response = requests.get(url=f'http://statsapi.mlb.com/api/v1/people/{player_id}?hydrate=stats(type=gameLog,season={season},startDate={start_date},endDate={end_date},sportId={sport_id},gameType=[{game_type_str}]),hydrations').json()
         
         # Extract game IDs from the API response
         player_game_list = [x['game']['gamePk'] for x in response['people'][0]['stats'][0]['splits']]
         
         return player_game_list
-    
+        
 
     def get_players(self, sport_id: int):
         """
