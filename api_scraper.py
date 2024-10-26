@@ -817,7 +817,7 @@ class MLB_Scrape:
 
         return leagues_df
 
-    def get_player_games_list(self, player_id: int, season: int, start_date: str = None, end_date: str = None, sport_id: int = 1, game_type: list = ['R']):):
+    def get_player_games_list(self, player_id: int, season: int, start_date: str = None, end_date: str = None, sport_id: int = 1, game_type: list = ['R']):
         """
         Retrieves a list of game IDs for a specific player in a given season.
         
