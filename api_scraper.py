@@ -859,18 +859,19 @@ class MLB_Scrape:
         return player_game_list
         
 
-    def get_players(self, sport_id: int):
+    def get_players(self, sport_id: int, season: int):
         """
         Retrieves data frame of players in a given league
 
         Parameters:
         - sport_id (int): The ID of the sport for which to retrieve player data.
+        - season (int): The season year for which to retrieve player data.
 
         Returns:
         - player_df (pl.DataFrame): A DataFrame containing player information, including player ID, name, position, team, and age.
         """
     
-        player_data = requests.get(url=f'https://statsapi.mlb.com/api/v1/sports/{sport_id}/players').json()
+        player_data = requests.get(url=f'https://statsapi.mlb.com/api/v1/sports/{sport_id}/players?season={season}').json()
 
         #Select relevant data that will help distinguish players from one another
 
