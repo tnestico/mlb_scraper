@@ -875,16 +875,16 @@ class MLB_Scrape:
 
         #Select relevant data that will help distinguish players from one another
 
-        fullName_list = [x['fullName'] for x in player_data['people']]
-        firstName_list = [x['firstName'] for x in player_data['people']]
-        lastName_list = [x['lastName'] for x in player_data['people']]
-        id_list = [x['id'] for x in player_data['people']]
-        position_list = [x['primaryPosition']['abbreviation'] for x in player_data['people']]
-        team_list = [x['currentTeam']['id']for x in player_data['people']]
-        weight_list = [x['weight'] for x in player_data['people']]
-        height_list = [x['height'] for x in player_data['people']]
-        age_list = [x['currentAge']for x in player_data['people']]
-        birthDate_list = [x['birthDate']for x in player_data['people']]
+        fullName_list = [x['fullName'] if 'fullName' in x else None for x in player_data['people']]
+        firstName_list = [x['firstName'] if 'firstName' in x else None for x in player_data['people']]
+        lastName_list = [x['lastName'] if 'lastName' in x else None for x in player_data['people']]
+        id_list = [x['id'] if 'id' in x else None for x in player_data['people']]
+        position_list = [x['primaryPosition']['abbreviation'] if 'primaryPosition' in x else None for x in player_data['people']]
+        team_list = [x['currentTeam']['id'] if 'currentTeam' in x else None for x in player_data['people']]
+        weight_list = [x['weight'] if 'weight' in x else None for x in player_data['people']]
+        height_list = [x['height'] if 'height' in x else None for x in player_data['people']]
+        age_list = [x['currentAge'] if 'currentAge' in x else None for x in player_data['people']]
+        birthDate_list = [x['birthDate'] if 'birthDate' in x else None for x in player_data['people']]
 
 
 
