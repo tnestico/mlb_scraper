@@ -5,6 +5,7 @@ from datetime import datetime
 from tqdm import tqdm
 from pytz import timezone
 import re
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
 class MLB_Scrape:
@@ -140,7 +141,7 @@ class MLB_Scrape:
 
     def get_data(self, game_list_input: list):
         """
-        Retrieves live game data for a list of game IDs.
+        Retrieves live game data for a list of game IDs in parallel.
         
         Parameters:
         - game_list_input (list): A list of game IDs for which to retrieve live data.
@@ -151,12 +152,14 @@ class MLB_Scrape:
         data_total = []
         print('This May Take a While. Progress Bar shows Completion of Data Retrieval.')
         
-        # Iterate over the list of game IDs with a progress bar
-        for i in tqdm(range(len(game_list_input)), desc="Processing", unit="iteration"):
-            # Make a GET request to the MLB API for each game ID
-            r = requests.get(f'https://statsapi.mlb.com/api/v1.1/game/{game_list_input[i]}/feed/live')
-            # Append the JSON response to the data_total list
-            data_total.append(r.json())
+        def fetch_data(game_id):
+            r = requests.get(f'https://statsapi.mlb.com/api/v1.1/game/{game_id}/feed/live')
+            return r.json()
+        
+        with ThreadPoolExecutor() as executor:
+            futures = {executor.submit(fetch_data, game_id): game_id for game_id in game_list_input}
+            for future in tqdm(as_completed(futures), total=len(futures), desc="Processing", unit="iteration"):
+                data_total.append(future.result())
         
         return data_total
 
