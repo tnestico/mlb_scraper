@@ -862,7 +862,7 @@ class MLB_Scrape:
         return player_game_list
         
 
-    def get_players(self, sport_id: int, season: int):
+    def get_players(self, sport_id: int, season: int, game_type: list = ['R']):
         """
         Retrieves data frame of players in a given league
 
@@ -874,32 +874,53 @@ class MLB_Scrape:
         - player_df (pl.DataFrame): A DataFrame containing player information, including player ID, name, position, team, and age.
         """
     
-        player_data = requests.get(url=f'https://statsapi.mlb.com/api/v1/sports/{sport_id}/players?season={season}').json()
+        game_type_str = ','.join([str(x) for x in game_type])
 
-        #Select relevant data that will help distinguish players from one another
+        if game_type_str == 'S':
+            player_data = requests.get(f'https://bdfed.stitch.mlbinfra.com/bdfed/stats/player?&env=prod&season={season}&sportId=1&stats=season&group=pitching&gameType=S&limit=1000000&offset=0&sortStat=inningsPitched&order=asc').json()
+            fullName_list = [x['playerFullName'] if 'playerFullName' in x else None for x in player_data['stats']]
+            firstName_list = [x['playerFirstName'] if 'playerFirstName' in x else None for x in player_data['stats']]
+            lastName_list = [x['playerLastName'] if 'playerLastName' in x else None for x in player_data['stats']]
+            id_list = [x['playerId'] if 'playerId' in x else None for x in player_data['stats']]
+            position_list = [x['primaryPositionAbbrev'] if 'primaryPositionAbbrev' in x else None for x in player_data['stats']]
+            team_list = [x['teamId'] if 'teamId' in x else None for x in player_data['stats']]
+            
+            df = pl.DataFrame(data={'player_id':id_list,
+                                            'first_name':firstName_list,
+                                            'last_name':lastName_list,
+                                            'name':fullName_list,
+                                            'position':position_list,
+                                            'team':team_list})
         
-        fullName_list = [x['fullName'] if 'fullName' in x else None for x in player_data['people']]
-        firstName_list = [x['firstName'] if 'firstName' in x else None for x in player_data['people']]
-        lastName_list = [x['lastName'] if 'lastName' in x else None for x in player_data['people']]
-        id_list = [x['id'] if 'id' in x else None for x in player_data['people']]
-        position_list = [x['primaryPosition']['abbreviation'] if 'primaryPosition' in x and 'abbreviation' in x['primaryPosition'] else None for x in player_data['people']]
-        team_list = [x['currentTeam']['id'] if 'currentTeam' in x and 'id' in x['currentTeam'] else None for x in player_data['people']]
-        weight_list = [x['weight'] if 'weight' in x else None for x in player_data['people']]
-        height_list = [x['height'] if 'height' in x else None for x in player_data['people']]
-        age_list = [x['currentAge'] if 'currentAge' in x else None for x in player_data['people']]
-        birthDate_list = [x['birthDate'] if 'birthDate' in x else None for x in player_data['people']]
+        else:
+            player_data = requests.get(url=f'https://statsapi.mlb.com/api/v1/sports/{sport_id}/players?season={season}&gameType=[{game_type_str}]').json()['people']
 
-
-        df = pl.DataFrame(data={'player_id':id_list,
-                                        'first_name':firstName_list,
-                                        'last_name':lastName_list,
-                                        'name':fullName_list,
-                                        'position':position_list,
-                                        'team':team_list,
-                                        'weight':weight_list,
-                                        'height':height_list,
-                                        'age':age_list,
-                                        'birthDate':birthDate_list})
+            #Select relevant data that will help distinguish players from one another
+            
+            fullName_list = [x['fullName'] if 'fullName' in x else None for x in player_data]
+            firstName_list = [x['firstName'] if 'firstName' in x else None for x in player_data]
+            lastName_list = [x['lastName'] if 'lastName' in x else None for x in player_data]
+            id_list = [x['id'] if 'id' in x else None for x in player_data]
+            position_list = [x['primaryPosition']['abbreviation'] if 'primaryPosition' in x and 'abbreviation' in x['primaryPosition'] else None for x in player_data]
+            team_list = [x['currentTeam']['id'] if 'currentTeam' in x and 'id' in x['currentTeam'] else None for x in player_data]
+            weight_list = [x['weight'] if 'weight' in x else None for x in player_data]
+            height_list = [x['height'] if 'height' in x else None for x in player_data]
+            age_list = [x['currentAge'] if 'currentAge' in x else None for x in player_data]
+            birthDate_list = [x['birthDate'] if 'birthDate' in x else None for x in player_data]
+    
+    
+    
+            df = pl.DataFrame(data={'player_id':id_list,
+                                            'first_name':firstName_list,
+                                            'last_name':lastName_list,
+                                            'name':fullName_list,
+                                            'position':position_list,
+                                            'team':team_list,
+                                            'weight':weight_list,
+                                            'height':height_list,
+                                            'age':age_list,
+                                            'birthDate':birthDate_list})
               
         return df
+
 
