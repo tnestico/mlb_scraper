@@ -548,89 +548,6 @@ class MLB_Scrape:
                         home_score.append(None)
                         is_out.append(None)
                         
-        # print({
-        #     'game_id':len(game_id),
-        #     'game_date':len(game_date),
-        #     'batter_id':len(batter_id),
-        #     'batter_name':len(batter_name),
-        #     'batter_hand':len(batter_hand),
-        #     'batter_team':len(batter_team),
-        #     'batter_team_id':len(batter_team_id),
-        #     'pitcher_id':len(pitcher_id),
-        #     'pitcher_name':len(pitcher_name),
-        #     'pitcher_hand':len(pitcher_hand),
-        #     'pitcher_team':len(pitcher_team),
-        #     'pitcher_team_id':len(pitcher_team_id),
-            
-        #     'play_description':len(play_description),
-        #     'play_code':len(play_code),
-        #     'in_play':len(in_play),
-        #     'is_strike':len(is_strike),
-        #     'is_swing':len(is_swing),
-        #     'is_whiff':len(is_whiff),
-        #     'is_out':len(is_out),
-        #     'is_ball':len(is_ball),
-        #     'is_review':len(is_review),
-        #     'pitch_type':len(pitch_type),
-        #     'pitch_description':len(pitch_description),
-        #     'strikes':len(strikes),
-        #     'balls':len(balls),
-        #     'outs':len(outs),
-        #     'strikes_after':len(strikes_after),
-        #     'balls_after':len(balls_after),
-        #     'outs_after':len(outs_after),            
-        #     'start_speed':len(start_speed),
-        #     'end_speed':len(end_speed),
-        #     'sz_top':len(sz_top),
-        #     'sz_bot':len(sz_bot),
-        #     'x':len(x),
-        #     'y':len(y),
-        #     'ax':len(ax),
-        #     'ay':len(ay),
-        #     'az':len(az),
-        #     'pfxx':len(pfxx),
-        #     'pfxz':len(pfxz),
-        #     'px':len(px),
-        #     'pz':len(pz),
-        #     'vx0':len(vx0),
-        #     'vy0':len(vy0),
-        #     'vz0':len(vz0),
-        #     'x0':len(x0),
-        #     'y0':len(y0),
-        #     'z0':len(z0),
-        #     'zone':len(zone),
-        #     'type_confidence':len(type_confidence),
-        #     'plate_time':len(plate_time),
-        #     'extension':len(extension),
-        #     'spin_rate':len(spin_rate),
-        #     'spin_direction':len(spin_direction),
-        #     'vb':len(vb),
-        #     'ivb':len(ivb),
-        #     'hb':len(hb),
-        #     'launch_speed':len(launch_speed),
-        #     'launch_angle':len(launch_angle),
-        #     'launch_distance':len(launch_distance),
-        #     'launch_location':len(launch_location),
-        #     'trajectory':len(trajectory),
-        #     'hardness':len(hardness),
-        #     'hit_x':len(hit_x),
-        #     'hit_y':len(hit_y),
-        #     'index_play':len(index_play),
-        #     'play_id':len(play_id),
-        #     'start_time':len(start_time),
-        #     'end_time':len(end_time),
-        #     'is_pitch':len(is_pitch),
-        #     'type_type':len(type_type),
-        #     'type_ab':len(type_ab),
-        #     'event':len(event),
-        #     'event_type':len(event_type),
-        #     'rbi':len(rbi),
-        #     'away_score':len(away_score),
-        #     'home_score':len(home_score),
-        #     }
-
-
-        # )
         df  = pl.DataFrame(data={
             'game_id':game_id,
             'game_date':game_date,
@@ -716,23 +633,6 @@ class MLB_Scrape:
 
         return df
 
-    # def get_players(self,sport_id:int):
-    #     player_data = requests.get(url=f'https://statsapi.mlb.com/api/v1/sports/{sport_id}/players').json()
-
-    #     #Select relevant data that will help distinguish players from one another
-    #     fullName_list = [x['fullName'] for x in player_data['people']]
-    #     id_list = [x['id'] for x in player_data['people']]
-    #     position_list = [x['primaryPosition']['abbreviation'] for x in player_data['people']]
-    #     team_list = [x['currentTeam']['id']for x in player_data['people']]
-    #     age_list = [x['currentAge']for x in player_data['people']]
-
-    #     player_df = pl.DataFrame(data={'player_id':id_list,
-    #                     'name':fullName_list,
-    #                     'position':position_list,
-    #                     'team':team_list,
-    #                     'age':age_list})
-    #     return player_df
-    
     def get_teams(self):
         """
         Retrieves information about MLB teams from the MLB API and processes it into a Polars DataFrame.
@@ -820,7 +720,13 @@ class MLB_Scrape:
 
         return leagues_df
 
-    def get_player_games_list(self, player_id: int, season: int, start_date: str = None, end_date: str = None, sport_id: int = 1, game_type: list = ['R']):
+    def get_player_games_list(self, player_id: int, 
+                              season: int, 
+                              start_date: str = None, 
+                              end_date: str = None, 
+                              sport_id: int = 1, 
+                              game_type: list = ['R'],
+                              pitching: bool = True):
         """
         Retrieves a list of game IDs for a specific player in a given season.
         
@@ -828,21 +734,22 @@ class MLB_Scrape:
         - player_id (int): The ID of the player.
         - season (int): The season year for which to retrieve the game list.
         - start_date (str): The start date (YYYY-MM-DD) of the range (default is January 1st of the specified season).
-        - end_date (str): The end date (YYYY-MM-DD)  of the range (default is December 31st of the specified season).
+        - end_date (str): The end date (YYYY-MM-DD) of the range (default is December 31st of the specified season).
         - sport_id (int): The ID of the sport for which to retrieve player data.
         - game_type (list): A list of game types to filter the schedule. Default is ['R'].
+        - pitching (bool): Return pitching games.
         
         Returns:
         - player_game_list (list): A list of game IDs in which the player participated during the specified season.
         """
         # Set default start and end dates if not provided
-
         if not start_date:
             start_date = f'{season}-01-01'
         if not end_date:
             end_date = f'{season}-12-31'
 
-
+        # Determine the group based on the pitching flag
+        group = 'pitching' if pitching else 'hitting'
 
         # Validate date format
         date_pattern = re.compile(r'^\d{4}-\d{2}-\d{2}$')
@@ -851,17 +758,22 @@ class MLB_Scrape:
         if not date_pattern.match(end_date):
             raise ValueError(f"end_date {end_date} is not in YYYY-MM-DD format")
 
+        # Convert game type list to a comma-separated string
         game_type_str = ','.join([str(x) for x in game_type])
 
         # Make API call to retrieve player game logs
-        response = requests.get(url=f'http://statsapi.mlb.com/api/v1/people/{player_id}?hydrate=stats(type=gameLog,season={season},startDate={start_date},endDate={end_date},sportId={sport_id},gameType=[{game_type_str}]),hydrations').json()
-        print(f'http://statsapi.mlb.com/api/v1/people/{player_id}?hydrate=stats(type=gameLog,season={season},startDate={start_date},endDate={end_date},sportId={sport_id},gameType=[{game_type_str}]),hydrations')
+        response = requests.get(url=f'http://statsapi.mlb.com/api/v1/people/{player_id}?hydrate=stats(group={group},type=gameLog,season={season},startDate={start_date},endDate={end_date},sportId={sport_id},gameType=[{game_type_str}]),hydrations').json()
+        
+        # Check if stats are available in the response
+        if 'stats' not in response['people'][0]:
+            print(f'No {group} games found for player {player_id} in season {season}')
+            return []
+
         # Extract game IDs from the API response
         player_game_list = [x['game']['gamePk'] for x in response['people'][0]['stats'][0]['splits']]
         
         return player_game_list
         
-
     def get_players(self, sport_id: int, season: int, game_type: list = ['R']):
         """
         Retrieves data frame of players in a given league
@@ -869,58 +781,81 @@ class MLB_Scrape:
         Parameters:
         - sport_id (int): The ID of the sport for which to retrieve player data.
         - season (int): The season year for which to retrieve player data.
+        - game_type (list): A list of game types to filter the players. Default is ['R'].
 
         Returns:
         - player_df (pl.DataFrame): A DataFrame containing player information, including player ID, name, position, team, and age.
         """
-    
         game_type_str = ','.join([str(x) for x in game_type])
 
+        # If game type is 'S', fetch data from a different endpoint
         if game_type_str == 'S':
-            player_data = requests.get(f'https://bdfed.stitch.mlbinfra.com/bdfed/stats/player?&env=prod&season={season}&sportId=1&stats=season&group=pitching&gameType=S&limit=1000000&offset=0&sortStat=inningsPitched&order=asc').json()
-            fullName_list = [x['playerFullName'] if 'playerFullName' in x else None for x in player_data['stats']]
-            firstName_list = [x['playerFirstName'] if 'playerFirstName' in x else None for x in player_data['stats']]
-            lastName_list = [x['playerLastName'] if 'playerLastName' in x else None for x in player_data['stats']]
-            id_list = [x['playerId'] if 'playerId' in x else None for x in player_data['stats']]
-            position_list = [x['primaryPositionAbbrev'] if 'primaryPositionAbbrev' in x else None for x in player_data['stats']]
-            team_list = [x['teamId'] if 'teamId' in x else None for x in player_data['stats']]
+            # Fetch pitcher data
+            pitcher_data = requests.get(f'https://bdfed.stitch.mlbinfra.com/bdfed/stats/player?&env=prod&season={season}&sportId=1&stats=season&group=pitching&gameType=S&limit=1000000&offset=0&sortStat=inningsPitched&order=asc').json()
+            fullName_list = [x['playerFullName'] for x in pitcher_data['stats']]
+            firstName_list = [x['playerFirstName'] for x in pitcher_data['stats']]
+            lastName_list = [x['playerLastName'] for x in pitcher_data['stats']]
+            id_list = [x['playerId'] for x in pitcher_data['stats']]
+            position_list = [x['primaryPositionAbbrev'] for x in pitcher_data['stats']]
+            team_list = [x['teamId'] for x in pitcher_data['stats']]
             
-            df = pl.DataFrame(data={'player_id':id_list,
-                                            'first_name':firstName_list,
-                                            'last_name':lastName_list,
-                                            'name':fullName_list,
-                                            'position':position_list,
-                                            'team':team_list})
+            df_pitcher = pl.DataFrame(data={
+                'player_id': id_list,
+                'first_name': firstName_list,
+                'last_name': lastName_list,
+                'name': fullName_list,
+                'position': position_list,
+                'team': team_list
+            })
+            
+            # Fetch batter data
+            batter_data = requests.get(f'https://bdfed.stitch.mlbinfra.com/bdfed/stats/player?&env=prod&season={season}&sportId=1&stats=season&group=hitting&gameType=S&limit=1000000&offset=0').json()
+            fullName_list = [x['playerFullName'] for x in batter_data['stats']]
+            firstName_list = [x['playerFirstName'] for x in batter_data['stats']]
+            lastName_list = [x['playerLastName'] for x in batter_data['stats']]
+            id_list = [x['playerId'] for x in batter_data['stats']]
+            position_list = [x['primaryPositionAbbrev'] for x in batter_data['stats']]
+            team_list = [x['teamId'] for x in batter_data['stats']]
+            
+            df_batter = pl.DataFrame(data={
+                'player_id': id_list,
+                'first_name': firstName_list,
+                'last_name': lastName_list,
+                'name': fullName_list,
+                'position': position_list,
+                'team': team_list
+            })
+
+            # Combine pitcher and batter data
+            df = pl.concat([df_pitcher, df_batter]).unique().drop_nulls(subset=['player_id']).sort('player_id')
         
         else:
+            # Fetch player data for other game types
             player_data = requests.get(url=f'https://statsapi.mlb.com/api/v1/sports/{sport_id}/players?season={season}&gameType=[{game_type_str}]').json()['people']
 
-            #Select relevant data that will help distinguish players from one another
-            
-            fullName_list = [x['fullName'] if 'fullName' in x else None for x in player_data]
-            firstName_list = [x['firstName'] if 'firstName' in x else None for x in player_data]
-            lastName_list = [x['lastName'] if 'lastName' in x else None for x in player_data]
-            id_list = [x['id'] if 'id' in x else None for x in player_data]
-            position_list = [x['primaryPosition']['abbreviation'] if 'primaryPosition' in x and 'abbreviation' in x['primaryPosition'] else None for x in player_data]
-            team_list = [x['currentTeam']['id'] if 'currentTeam' in x and 'id' in x['currentTeam'] else None for x in player_data]
+            # Extract relevant data
+            fullName_list = [x['fullName'] for x in player_data]
+            firstName_list = [x['firstName'] for x in player_data]
+            lastName_list = [x['lastName'] for x in player_data]
+            id_list = [x['id'] for x in player_data]
+            position_list = [x['primaryPosition']['abbreviation'] if 'primaryPosition' in x else None for x in player_data]
+            team_list = [x['currentTeam']['id'] if 'currentTeam' in x else None for x in player_data]
             weight_list = [x['weight'] if 'weight' in x else None for x in player_data]
             height_list = [x['height'] if 'height' in x else None for x in player_data]
             age_list = [x['currentAge'] if 'currentAge' in x else None for x in player_data]
             birthDate_list = [x['birthDate'] if 'birthDate' in x else None for x in player_data]
     
-    
-    
-            df = pl.DataFrame(data={'player_id':id_list,
-                                            'first_name':firstName_list,
-                                            'last_name':lastName_list,
-                                            'name':fullName_list,
-                                            'position':position_list,
-                                            'team':team_list,
-                                            'weight':weight_list,
-                                            'height':height_list,
-                                            'age':age_list,
-                                            'birthDate':birthDate_list})
-              
+            df = pl.DataFrame(data={
+                'player_id': id_list,
+                'first_name': firstName_list,
+                'last_name': lastName_list,
+                'name': fullName_list,
+                'position': position_list,
+                'team': team_list,
+                'weight': weight_list,
+                'height': height_list,
+                'age': age_list,
+                'birthDate': birthDate_list
+            })
+                
         return df
-
-
