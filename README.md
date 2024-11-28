@@ -63,7 +63,7 @@ Retrieves information about MLB leagues from the MLB API and processes it into a
 
 - **Returns**: `pl.DataFrame` - A DataFrame containing league information, including league ID, league name, league abbreviation, and sport ID.
 
-#### `get_player_games_list(self, player_id: int, season: int, start_date: str=None, end_date: str=None))`
+#### `get_player_games_list(self, player_id: int, season: int, start_date: str, end_date: str, sport_id: int, game_type: list, pitching: bool):`
 Retrieves a list of game IDs for a specific player in a given season.
 
 - **Parameters**:
@@ -71,6 +71,9 @@ Retrieves a list of game IDs for a specific player in a given season.
   - `season` (int): The season year for which to retrieve the game list.
   - `start_date` (str): The start date (YYYY-MM-DD) of the range (default is January 1st of the specified season).
   - `end_date` (str): The end date (YYYY-MM-DD)  of the range (default is December 31st of the specified season).
+  - `sport_id` (int): The ID of the sport for which to retrieve player data.
+  - `game_type` (list): A list of game types to filter the schedule. Default is ['R'].
+  - `pitching` (bool): Return pitching games.
 - **Returns**: `list` - A list of game IDs in which the player participated during the specified season.
 
 #### `get_data_df(self, data_list: list)`
@@ -85,12 +88,14 @@ Retrieves the different types of MLB games from the MLB API and processes them i
 
 - **Returns**: `pl.DataFrame` - A DataFrame containing the game types information.
 
-#### `get_players(self, sport_id: int)`
+#### `get_players(self, sport_id: int, game_type: list)`
 
 Retrieves data frame of players in a given league
 
 - **Parameters**:
   - `sport_id` (int): The ID of the sport for which to retrieve player data.
+  - `season` (int): The season year for which to retrieve player data.
+  - `game_type` (list): A list of game types to filter the players. Default is ['R'].
 
 - **Returns**: `pl.DataFrame`: A DataFrame containing player information, including player ID, name, position, team, and age.
 
