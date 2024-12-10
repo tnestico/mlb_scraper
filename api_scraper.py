@@ -99,42 +99,48 @@ class MLB_Scrape:
 
         # Make API call to retrieve game schedule
         game_call = requests.get(url=f'https://statsapi.mlb.com/api/v1/schedule/?sportId={sport_id_str}&gameTypes={game_type_str}&season={year_input_str}&hydrate=lineup,players').json()
+        try:
+            # Extract relevant data from the API response
+            game_list = [item for sublist in [[y['gamePk'] for y in x['games']] for x in game_call['dates']] for item in sublist]
+            time_list = [item for sublist in [[y['gameDate'] for y in x['games']] for x in game_call['dates']] for item in sublist]
+            date_list = [item for sublist in [[y['officialDate'] for y in x['games']] for x in game_call['dates']] for item in sublist]
+            away_team_list = [item for sublist in [[y['teams']['away']['team']['name'] for y in x['games']] for x in game_call['dates']] for item in sublist]
+            home_team_list = [item for sublist in [[y['teams']['home']['team']['name'] for y in x['games']] for x in game_call['dates']] for item in sublist]
+            state_list = [item for sublist in [[y['status']['codedGameState'] for y in x['games']] for x in game_call['dates']] for item in sublist]
+            venue_id = [item for sublist in [[y['venue']['id'] for y in x['games']] for x in game_call['dates']] for item in sublist]
+            venue_name = [item for sublist in [[y['venue']['name'] for y in x['games']] for x in game_call['dates']] for item in sublist]
 
-        # Extract relevant data from the API response
-        game_list = [item for sublist in [[y['gamePk'] for y in x['games']] for x in game_call['dates']] for item in sublist]
-        time_list = [item for sublist in [[y['gameDate'] for y in x['games']] for x in game_call['dates']] for item in sublist]
-        date_list = [item for sublist in [[y['officialDate'] for y in x['games']] for x in game_call['dates']] for item in sublist]
-        away_team_list = [item for sublist in [[y['teams']['away']['team']['name'] for y in x['games']] for x in game_call['dates']] for item in sublist]
-        home_team_list = [item for sublist in [[y['teams']['home']['team']['name'] for y in x['games']] for x in game_call['dates']] for item in sublist]
-        state_list = [item for sublist in [[y['status']['codedGameState'] for y in x['games']] for x in game_call['dates']] for item in sublist]
-        venue_id = [item for sublist in [[y['venue']['id'] for y in x['games']] for x in game_call['dates']] for item in sublist]
-        venue_name = [item for sublist in [[y['venue']['name'] for y in x['games']] for x in game_call['dates']] for item in sublist]
+            # Create a Polars DataFrame with the extracted data
+            game_df = pl.DataFrame(data={'game_id': game_list,
+                                        'time': time_list,
+                                        'date': date_list,
+                                        'away': away_team_list,
+                                        'home': home_team_list,
+                                        'state': state_list,
+                                        'venue_id': venue_id,
+                                        'venue_name': venue_name})
+        
+            # Check if the DataFrame is empty
+            if len(game_df) == 0:
+                print('Schedule Length of 0, please select different parameters.')
+                return None
 
-        # Create a Polars DataFrame with the extracted data
-        game_df = pl.DataFrame(data={'game_id': game_list,
-                                    'time': time_list,
-                                    'date': date_list,
-                                    'away': away_team_list,
-                                    'home': home_team_list,
-                                    'state': state_list,
-                                    'venue_id': venue_id,
-                                    'venue_name': venue_name})
+            # Convert date and time columns to appropriate formats
+            game_df = game_df.with_columns(
+                game_df['date'].str.to_date(),
+                game_df['time'].str.to_datetime().dt.convert_time_zone(eastern.zone).dt.strftime("%I:%M %p"))
 
-        # Check if the DataFrame is empty
-        if len(game_df) == 0:
-            return 'Schedule Length of 0, please select different parameters.'
+            # Remove duplicate games and sort by date
+            game_df = game_df.unique(subset='game_id').sort('date')
 
-        # Convert date and time columns to appropriate formats
-        game_df = game_df.with_columns(
-            game_df['date'].str.to_date(),
-            game_df['time'].str.to_datetime().dt.convert_time_zone(eastern.zone).dt.strftime("%I:%M %p"))
-
-        # Remove duplicate games and sort by date
-        game_df = game_df.unique(subset='game_id').sort('date')
-
-        # Check again if the DataFrame is empty after processing
-        if len(game_df) == 0:
-            return 'Schedule Length of 0, please select different parameters.'
+            # Check again if the DataFrame is empty after processing
+            if len(game_df) == 0:
+                print('Schedule Length of 0, please select different parameters.')
+                return None
+        except KeyError:
+            print('No Data for Selected Parameters')
+            return None
+        
 
         return game_df
     
