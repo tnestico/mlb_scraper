@@ -101,14 +101,14 @@ class MLB_Scrape:
         game_call = requests.get(url=f'https://statsapi.mlb.com/api/v1/schedule/?sportId={sport_id_str}&gameTypes={game_type_str}&season={year_input_str}&hydrate=lineup,players').json()
         try:
             # Extract relevant data from the API response
-            game_list = [item for sublist in [[y['gamePk'] for y in x['games']] for x in game_call['dates']] for item in sublist]
-            time_list = [item for sublist in [[y['gameDate'] for y in x['games']] for x in game_call['dates']] for item in sublist]
-            date_list = [item for sublist in [[y['officialDate'] for y in x['games']] for x in game_call['dates']] for item in sublist]
-            away_team_list = [item for sublist in [[y['teams']['away']['team']['name'] for y in x['games']] for x in game_call['dates']] for item in sublist]
-            home_team_list = [item for sublist in [[y['teams']['home']['team']['name'] for y in x['games']] for x in game_call['dates']] for item in sublist]
-            state_list = [item for sublist in [[y['status']['codedGameState'] for y in x['games']] for x in game_call['dates']] for item in sublist]
-            venue_id = [item for sublist in [[y['venue']['id'] for y in x['games']] for x in game_call['dates']] for item in sublist]
-            venue_name = [item for sublist in [[y['venue']['name'] for y in x['games']] for x in game_call['dates']] for item in sublist]
+            game_list = [item for sublist in [[y.get('gamePk') for y in x['games']] for x in game_call['dates']] for item in sublist]
+            time_list = [item for sublist in [[y.get('gameDate') for y in x['games']] for x in game_call['dates']] for item in sublist]
+            date_list = [item for sublist in [[y.get('officialDate') for y in x['games']] for x in game_call['dates']] for item in sublist]
+            away_team_list = [item for sublist in [[y['teams']['away']['team'].get('name') for y in x['games']] for x in game_call['dates']] for item in sublist]
+            home_team_list = [item for sublist in [[y['teams']['home']['team'].get('name') for y in x['games']] for x in game_call['dates']] for item in sublist]
+            state_list = [item for sublist in [[y['status'].get('codedGameState') for y in x['games']] for x in game_call['dates']] for item in sublist]
+            venue_id = [item for sublist in [[y['venue'].get('id', None) for y in x['games']] for x in game_call['dates']] for item in sublist]
+            venue_name = [item for sublist in [[y['venue'].get('name') for y in x['games']] for x in game_call['dates']] for item in sublist]
 
             # Create a Polars DataFrame with the extracted data
             game_df = pl.DataFrame(data={'game_id': game_list,
@@ -119,6 +119,7 @@ class MLB_Scrape:
                                         'state': state_list,
                                         'venue_id': venue_id,
                                         'venue_name': venue_name})
+
         
             # Check if the DataFrame is empty
             if len(game_df) == 0:
