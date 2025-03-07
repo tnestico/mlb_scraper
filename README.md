@@ -2,6 +2,8 @@
 
 This Python module provides a class `MLB_Scrape` that interacts with the MLB Stats API to retrieve various types of baseball-related data. The data is processed and returned as Polars DataFrames for easy manipulation and analysis.
 
+![alt text](logo/tj_logo.jpg "Logo")
+
 ## Requirements
 
 - Python 3.x
