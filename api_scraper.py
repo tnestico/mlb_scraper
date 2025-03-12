@@ -188,8 +188,8 @@ class MLB_Scrape:
         Returns:
         - data_df (pl.DataFrame): A DataFrame containing the structured game data.
         """
-        swing_list = ['X','F','S','D','E','T','W']
-        whiff_list = ['S','T','W']
+        swing_list = ['X','F','S','D','E','T','W','L','M','Q','Z','R','O','J']
+        whiff_list = ['S','T','W','M','Q','O']
         print('Converting Data to Dataframe.')
         game_id = []
         game_date = []
