@@ -828,7 +828,7 @@ class MLB_Scrape:
             })
             
             # Fetch batter data
-            batter_data = requests.get(f'https://bdfed.stitch.mlbinfra.com/bdfed/stats/player?&env=prod&season={season}&sportId=1&stats=season&group=hitting&gameType=S&limit=1000000&offset=0').json()
+            batter_data = requests.get(f'https://bdfed.stitch.mlbinfra.com/bdfed/stats/player?&env=prod&season={season}&sportId=1&stats=season&group=hitting&gameType=S&limit=1000000&offset=0&sortStat=homeRuns&order=desc').json()
             fullName_list = [x['playerFullName'] for x in batter_data['stats']]
             firstName_list = [x['playerFirstName'] for x in batter_data['stats']]
             lastName_list = [x['playerLastName'] for x in batter_data['stats']]
