@@ -100,20 +100,25 @@ class MLB_Scrape:
         # Make API call to retrieve game schedule
         game_call = requests.get(url=f'https://statsapi.mlb.com/api/v1/schedule/?sportId={sport_id_str}&gameTypes={game_type_str}&season={year_input_str}&hydrate=lineup,players').json()
         try:
-            # Extract relevant data from the API response
-            game_list = [item for sublist in [[y['gamePk'] for y in x['games']] for x in game_call['dates']] for item in sublist]
-            time_list = [item for sublist in [[y['gameDate'] for y in x['games']] for x in game_call['dates']] for item in sublist]
-            date_list = [item for sublist in [[y['officialDate'] for y in x['games']] for x in game_call['dates']] for item in sublist]
-            away_team_list = [item for sublist in [[y['teams']['away']['team']['name'] for y in x['games']] for x in game_call['dates']] for item in sublist]
-            away_team_id_list = [item for sublist in [[y['teams']['away']['team']['id'] for y in x['games']] for x in game_call['dates']] for item in sublist]
-            home_team_list = [item for sublist in [[y['teams']['home']['team']['name'] for y in x['games']] for x in game_call['dates']] for item in sublist]
-            home_team_id_list = [item for sublist in [[y['teams']['home']['team']['id'] for y in x['games']] for x in game_call['dates']] for item in sublist]
-            state_list = [item for sublist in [[y['status']['codedGameState'] for y in x['games']] for x in game_call['dates']] for item in sublist]
-            venue_id = [item for sublist in [[y['venue']['id'] for y in x['games']] for x in game_call['dates']] for item in sublist]
-            venue_name = [item for sublist in [[y['venue']['name'] for y in x['games']] for x in game_call['dates']] for item in sublist]
-            gameday_type = [item for sublist in [[y['gamedayType'] for y in x['games']] for x in game_call['dates']] for item in sublist]
-            # Create a Polars DataFrame with the extracted data
+            def safe_get(d, keys, default=np.nan):
+                """Safely retrieve nested dictionary values."""
+                for key in keys:
+                    d = d.get(key, {})
+                    if not isinstance(d, dict):
+                        return d  # Return value if it's not a dict
+                return default  # Return default if keys don't exist
 
+            game_list = [item for sublist in [[y.get('gamePk', np.nan) for y in x.get('games', [])] for x in game_call.get('dates', [])] for item in sublist]
+            time_list = [item for sublist in [[y.get('gameDate', np.nan) for y in x.get('games', [])] for x in game_call.get('dates', [])] for item in sublist]
+            date_list = [item for sublist in [[y.get('officialDate', np.nan) for y in x.get('games', [])] for x in game_call.get('dates', [])] for item in sublist]
+            away_team_list = [item for sublist in [[safe_get(y, ['teams', 'away', 'team', 'name'], "") for y in x.get('games', [])] for x in game_call.get('dates', [])] for item in sublist]
+            away_team_id_list = [item for sublist in [[safe_get(y, ['teams', 'away', 'team', 'id'], np.nan) for y in x.get('games', [])] for x in game_call.get('dates', [])] for item in sublist]
+            home_team_list = [item for sublist in [[safe_get(y, ['teams', 'home', 'team', 'name'], "") for y in x.get('games', [])] for x in game_call.get('dates', [])] for item in sublist]
+            home_team_id_list = [item for sublist in [[safe_get(y, ['teams', 'home', 'team', 'id'], np.nan) for y in x.get('games', [])] for x in game_call.get('dates', [])] for item in sublist]
+            state_list = [item for sublist in [[safe_get(y, ['status', 'codedGameState'], "") for y in x.get('games', [])] for x in game_call.get('dates', [])] for item in sublist]
+            venue_id = [item for sublist in [[safe_get(y, ['venue', 'id'], np.nan) for y in x.get('games', [])] for x in game_call.get('dates', [])] for item in sublist]
+            venue_name = [item for sublist in [[safe_get(y, ['venue', 'name'], "") for y in x.get('games', [])] for x in game_call.get('dates', [])] for item in sublist]
+            gameday_type = [item for sublist in [[safe_get(y, ['gamedayType'], "") for y in x.get('games', [])] for x in game_call.get('dates', [])] for item in sublist]
 
             # Create a Polars DataFrame with the extracted data
             game_df = pl.DataFrame(data={'game_id': game_list,
@@ -828,7 +833,7 @@ class MLB_Scrape:
             })
             
             # Fetch batter data
-            batter_data = requests.get(f'https://bdfed.stitch.mlbinfra.com/bdfed/stats/player?&env=prod&season={season}&sportId=1&stats=season&group=hitting&gameType=S&limit=1000000&offset=0&sortStat=homeRuns&order=desc').json()
+            batter_data = requests.get(f'https://bdfed.stitch.mlbinfra.com/bdfed/stats/player?&env=prod&season={season}&sportId=1&stats=season&group=hitting&gameType=S&limit=1000000&offset=0').json()
             fullName_list = [x['playerFullName'] for x in batter_data['stats']]
             firstName_list = [x['playerFirstName'] for x in batter_data['stats']]
             lastName_list = [x['playerLastName'] for x in batter_data['stats']]
