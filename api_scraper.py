@@ -159,6 +159,28 @@ class MLB_Scrape:
         return game_df
     
 
+    def get_data_old(self, game_list_input: list):
+        """
+        Retrieves live game data for a list of game IDs.
+        
+        Parameters:
+        - game_list_input (list): A list of game IDs for which to retrieve live data.
+        
+        Returns:
+        - data_total (list): A list of JSON responses containing live game data for each game ID.
+        """
+        data_total = []
+        print('This May Take a While. Progress Bar shows Completion of Data Retrieval.')
+        
+        # Iterate over the list of game IDs with a progress bar
+        for i in tqdm(range(len(game_list_input)), desc="Processing", unit="iteration"):
+            # Make a GET request to the MLB API for each game ID
+            r = requests.get(f'https://statsapi.mlb.com/api/v1.1/game/{game_list_input[i]}/feed/live')
+            # Append the JSON response to the data_total list
+            data_total.append(r.json())
+        
+        return data_total
+
     def get_data(self, game_list_input: list):
         """
         Retrieves live game data for a list of game IDs in parallel.
@@ -226,6 +248,7 @@ class MLB_Scrape:
         strikes_after = []
         balls_after = []
         outs_after = []
+        inning = []
 
         start_speed = []
         end_speed = []
@@ -333,7 +356,8 @@ class MLB_Scrape:
                             else:
                                 is_swing.append(None)
                                 is_whiff.append(None)
-    
+
+                            inning.append(ab_list['about']['inning'] if 'inning' in ab_list['about'] else None)
                             is_ball.append(ab_list['playEvents'][n]['details']['isOut'] if 'isOut' in ab_list['playEvents'][n]['details'] else None)
                             is_review.append(ab_list['playEvents'][n]['details']['hasReview'] if 'hasReview' in ab_list['playEvents'][n]['details'] else None)
                             pitch_type.append(ab_list['playEvents'][n]['details']['type']['code'] if 'type' in ab_list['playEvents'][n]['details'] else None)
@@ -425,6 +449,7 @@ class MLB_Scrape:
                                 vb.append(None)
                                 ivb.append(None)
                                 hb.append(None)
+                                
     
                             if 'hitData' in ab_list['playEvents'][n]:
                                 launch_speed.append(ab_list['playEvents'][n]['hitData']['launchSpeed'] if 'launchSpeed' in ab_list['playEvents'][n]['hitData'] else None)
@@ -508,6 +533,7 @@ class MLB_Scrape:
                             is_review.append(None)
                             pitch_type.append(None)
                             pitch_description.append(None)
+                            inning.append(None)
                             strikes.append(ab_list['playEvents'][n]['count']['balls'] if 'balls' in ab_list['playEvents'][n]['count'] else None)
                             balls.append(ab_list['playEvents'][n]['count']['strikes'] if 'strikes' in ab_list['playEvents'][n]['count'] else None)
                             outs.append(ab_list['playEvents'][n]['count']['outs'] if 'outs' in ab_list['playEvents'][n]['count'] else None)
@@ -586,6 +612,7 @@ class MLB_Scrape:
             'pitcher_team':pitcher_team,
             'pitcher_team_id':pitcher_team_id,
             'ab_number':ab_number,
+            'inning':inning,
             'play_description':play_description,
             'play_code':play_code,
             'in_play':in_play,
@@ -860,7 +887,6 @@ class MLB_Scrape:
             # Extract relevant data
             fullName_list = [x['fullName'] for x in player_data]
             firstName_list = [x['firstName'] for x in player_data]
-            useName_list = [x['useName'] for x in player_data]
             lastName_list = [x['lastName'] for x in player_data]
             id_list = [x['id'] for x in player_data]
             position_list = [x['primaryPosition']['abbreviation'] if 'primaryPosition' in x else None for x in player_data]
@@ -873,7 +899,6 @@ class MLB_Scrape:
             df = pl.DataFrame(data={
                 'player_id': id_list,
                 'first_name': firstName_list,
-                'use_name': useName_list,
                 'last_name': lastName_list,
                 'name': fullName_list,
                 'position': position_list,
