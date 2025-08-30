@@ -863,6 +863,7 @@ class MLB_Scrape:
             batter_data = requests.get(f'https://bdfed.stitch.mlbinfra.com/bdfed/stats/player?&env=prod&season={season}&sportId=1&stats=season&group=hitting&gameType=S&limit=1000000&offset=0').json()
             fullName_list = [x['playerFullName'] for x in batter_data['stats']]
             firstName_list = [x['playerFirstName'] for x in batter_data['stats']]
+            useName_list = [x['useName'] for x in player_data]
             lastName_list = [x['playerLastName'] for x in batter_data['stats']]
             id_list = [x['playerId'] for x in batter_data['stats']]
             position_list = [x['primaryPositionAbbrev'] for x in batter_data['stats']]
@@ -871,6 +872,7 @@ class MLB_Scrape:
             df_batter = pl.DataFrame(data={
                 'player_id': id_list,
                 'first_name': firstName_list,
+                'use_name': useName_list,
                 'last_name': lastName_list,
                 'name': fullName_list,
                 'position': position_list,
@@ -887,6 +889,7 @@ class MLB_Scrape:
             # Extract relevant data
             fullName_list = [x['fullName'] for x in player_data]
             firstName_list = [x['firstName'] for x in player_data]
+            useName_list = [x['useName'] for x in player_data]
             lastName_list = [x['lastName'] for x in player_data]
             id_list = [x['id'] for x in player_data]
             position_list = [x['primaryPosition']['abbreviation'] if 'primaryPosition' in x else None for x in player_data]
@@ -899,6 +902,7 @@ class MLB_Scrape:
             df = pl.DataFrame(data={
                 'player_id': id_list,
                 'first_name': firstName_list,
+                'use_name': useName_list,
                 'last_name': lastName_list,
                 'name': fullName_list,
                 'position': position_list,
@@ -910,3 +914,4 @@ class MLB_Scrape:
             })
                 
         return df
+
