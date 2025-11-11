@@ -205,485 +205,396 @@ class MLB_Scrape:
         
         return data_total
 
+
     def get_data_df(self, data_list):
-        """
-        Converts a list of game data JSON objects into a Polars DataFrame.
-        
-        Parameters:
-        - data_list (list): A list of JSON objects containing game data.
-        
-        Returns:
-        - data_df (pl.DataFrame): A DataFrame containing the structured game data.
-        """
-        swing_list = ['X','F','S','D','E','T','W','L','M','Q','Z','R','O','J']
-        whiff_list = ['S','T','W','M','Q','O']
-        print('Converting Data to Dataframe.')
-        game_id = []
-        game_date = []
-        batter_id = []
-        batter_name = []
-        batter_hand = []
-        batter_team = []
-        batter_team_id = []
-        pitcher_id = []
-        pitcher_name = []
-        pitcher_hand = []
-        pitcher_team = []
-        pitcher_team_id = []
+            """
+            Converts a list of game data JSON objects into a Polars DataFrame.
+            
+            Parameters:
+            - data_list (list): A list of JSON objects containing game data.
+            
+            Returns:
+            - data_df (pl.DataFrame): A DataFrame containing the structured game data.
+            """
+            swing_list = ['X','F','S','D','E','T','W','L','M','Q','Z','R','O','J']
+            whiff_list = ['S','T','W','M','Q','O']
+            print('Converting Data to Dataframe.')
+            game_id = []
+            game_date = []
+            batter_id = []
+            batter_name = []
+            batter_hand = []
+            batter_team = []
+            batter_team_id = []
+            pitcher_id = []
+            pitcher_name = []
+            pitcher_hand = []
+            pitcher_team = []
+            pitcher_team_id = []
 
-        play_description = []
-        play_code = []
-        in_play = []
-        is_strike = []
-        is_swing = []
-        is_whiff = []
-        is_out = []
-        is_ball = []
-        is_review = []
-        pitch_type = []
-        pitch_description = []
-        strikes = []
-        balls = []
-        outs = []
-        strikes_after = []
-        balls_after = []
-        outs_after = []
-        inning = []
+            play_description = []
+            play_code = []
+            in_play = []
+            is_strike = []
+            is_swing = []
+            is_whiff = []
+            is_out = []
+            is_ball = []
+            is_review = []
+            pitch_type = []
+            pitch_description = []
+            strikes = []
+            balls = []
+            outs = []
+            strikes_after = []
+            balls_after = []
+            outs_after = []
+            inning = []
 
-        start_speed = []
-        end_speed = []
-        sz_top = []
-        sz_bot = []
-        x = []
-        y = []
-        ax = []
-        ay = []
-        az = []
-        pfxx = []
-        pfxz = []
-        px = []
-        pz = []
-        vx0 = []
-        vy0 = []
-        vz0 = []
-        x0 = []
-        y0 = []
-        z0 = []
-        zone = []
-        type_confidence = []
-        plate_time = []
-        extension = []
-        spin_rate = []
-        spin_direction = []
-        vb = []
-        ivb = []
-        hb = []
+            start_speed = []
+            end_speed = []
+            sz_top = []
+            sz_bot = []
+            x = []
+            y = []
+            ax = []
+            ay = []
+            az = []
+            pfxx = []
+            pfxz = []
+            px = []
+            pz = []
+            vx0 = []
+            vy0 = []
+            vz0 = []
+            x0 = []
+            y0 = []
+            z0 = []
+            zone = []
+            type_confidence = []
+            plate_time = []
+            extension = []
+            spin_rate = []
+            spin_direction = []
+            vb = []
+            ivb = []
+            hb = []
 
-        launch_speed = []
-        launch_angle = []
-        launch_distance = []
-        launch_location = []
-        trajectory = []
-        hardness = []
-        hit_x = []
-        hit_y = []
+            launch_speed = []
+            launch_angle = []
+            launch_distance = []
+            launch_location = []
+            trajectory = []
+            hardness = []
+            hit_x = []
+            hit_y = []
 
-        index_play = []
-        play_id = []
-        start_time = []
-        end_time = []
-        is_pitch = []
-        type_type = []
+            index_play = []
+            play_id = []
+            start_time = []
+            end_time = []
+            is_pitch = []
+            type_type = []
 
+            type_ab = []
+            ab_number = []
+            event = []
+            event_type = []
+            rbi = []
+            away_score = []
+            home_score = []
 
-        type_ab = []
-        ab_number = []
-        event = []
-        event_type = []
-        rbi = []
-        away_score = []
-        home_score = []
-
-        for data in data_list:
-            try:
-                for ab_id in range(len(data['liveData']['plays']['allPlays'])):
-                    ab_list = data['liveData']['plays']['allPlays'][ab_id]
-                    for n in range(len(ab_list['playEvents'])):
-                
+            for data in data_list:
+                try:
+                    for ab_id in range(len(data['liveData']['plays']['allPlays'])):
+                        ab_list = data['liveData']['plays']['allPlays'][ab_id]
                         
-                        if ab_list['playEvents'][n]['isPitch'] == True or 'call' in ab_list['playEvents'][n]['details']:
-                            ab_number.append(ab_list['atBatIndex'] if 'atBatIndex' in ab_list else None)
-    
-                            game_id.append(data['gamePk'])
-                            game_date.append(data['gameData']['datetime']['officialDate'])
-                            if 'matchup' in ab_list:
-                              batter_id.append(ab_list['matchup']['batter']['id'] if 'batter' in ab_list['matchup'] else None)
-                              if 'batter' in ab_list['matchup']:
-                                batter_name.append(ab_list['matchup']['batter']['fullName'] if 'fullName' in ab_list['matchup']['batter'] else None)
-                              else:
-                                batter_name.append(None)
-    
-                              batter_hand.append(ab_list['matchup']['batSide']['code'] if 'batSide' in ab_list['matchup'] else None)
-                              pitcher_id.append(ab_list['matchup']['pitcher']['id'] if 'pitcher' in ab_list['matchup'] else None)
-                              if 'pitcher' in ab_list['matchup']:
-                                pitcher_name.append(ab_list['matchup']['pitcher']['fullName'] if 'fullName' in ab_list['matchup']['pitcher'] else None)
-                              else:
-                                pitcher_name.append(None)
+                        # Extract result data once per at-bat
+                        ab_result = ab_list.get('result', {})
+                        
+                        for n in range(len(ab_list['playEvents'])):
                             
-                              pitcher_hand.append(ab_list['matchup']['pitchHand']['code'] if 'pitchHand' in ab_list['matchup'] else None)
-    
-    
-                            if ab_list['about']['isTopInning']:
-                                batter_team.append(data['gameData']['teams']['away']['abbreviation'] if 'away' in data['gameData']['teams'] else None)
-                                batter_team_id.append(data['gameData']['teams']['away']['id'] if 'away' in data['gameData']['teams'] else None)
-                                pitcher_team.append(data['gameData']['teams']['home']['abbreviation'] if 'home' in data['gameData']['teams'] else None)
-                                pitcher_team_id.append(data['gameData']['teams']['home']['id'] if 'home' in data['gameData']['teams'] else None)
-    
-                            else:
-                                batter_team.append(data['gameData']['teams']['home']['abbreviation'] if 'home' in data['gameData']['teams'] else None)
-                                batter_team_id.append(data['gameData']['teams']['home']['id'] if 'home' in data['gameData']['teams'] else None)
-                                pitcher_team.append(data['gameData']['teams']['away']['abbreviation'] if 'away' in data['gameData']['teams'] else None)
-                                pitcher_team_id.append(data['gameData']['teams']['away']['id'] if 'away' in data['gameData']['teams'] else None)
-    
-                            play_description.append(ab_list['playEvents'][n]['details']['description'] if 'description' in ab_list['playEvents'][n]['details'] else None)
-                            play_code.append(ab_list['playEvents'][n]['details']['code'] if 'code' in ab_list['playEvents'][n]['details'] else None)
-                            in_play.append(ab_list['playEvents'][n]['details']['isInPlay'] if 'isInPlay' in ab_list['playEvents'][n]['details'] else None)
-                            is_strike.append(ab_list['playEvents'][n]['details']['isStrike'] if 'isStrike' in ab_list['playEvents'][n]['details'] else None)
-    
-                            if 'details' in ab_list['playEvents'][n]:
-                                is_swing.append(True if ab_list['playEvents'][n]['details']['code'] in swing_list else None)
-                                is_whiff.append(True if ab_list['playEvents'][n]['details']['code'] in whiff_list else None)
-                            else:
-                                is_swing.append(None)
-                                is_whiff.append(None)
+                            # Determine if this event should be recorded
+                            is_pitch_or_call = ab_list['playEvents'][n].get('isPitch') == True or 'call' in ab_list['playEvents'][n].get('details', {})
+                            is_walk = 'count' in ab_list['playEvents'][n] and ab_list['playEvents'][n]['count'].get('balls') == 4
+                            
+                            if is_pitch_or_call or is_walk:
+                                ab_number.append(ab_list.get('atBatIndex'))
 
-                            inning.append(ab_list['about']['inning'] if 'inning' in ab_list['about'] else None)
-                            is_ball.append(ab_list['playEvents'][n]['details']['isOut'] if 'isOut' in ab_list['playEvents'][n]['details'] else None)
-                            is_review.append(ab_list['playEvents'][n]['details']['hasReview'] if 'hasReview' in ab_list['playEvents'][n]['details'] else None)
-                            pitch_type.append(ab_list['playEvents'][n]['details']['type']['code'] if 'type' in ab_list['playEvents'][n]['details'] else None)
-                            pitch_description.append(ab_list['playEvents'][n]['details']['type']['description'] if 'type' in ab_list['playEvents'][n]['details'] else None)
-    
-                            if ab_list['playEvents'][n]['pitchNumber'] == 1:
-                                strikes.append(0)
-                                balls.append(0)
-                                strikes_after.append(ab_list['playEvents'][n]['count']['strikes'] if 'strikes' in ab_list['playEvents'][n]['count'] else None)
-                                balls_after.append(ab_list['playEvents'][n]['count']['balls'] if 'balls' in ab_list['playEvents'][n]['count'] else None)
-                                outs.append(ab_list['playEvents'][n]['count']['outs'] if 'outs' in ab_list['playEvents'][n]['count'] else None)
-                                outs_after.append(ab_list['playEvents'][n]['count']['outs'] if 'outs' in ab_list['playEvents'][n]['count'] else None)
-    
-                            else:
-                                strikes.append(ab_list['playEvents'][n-1]['count']['strikes'] if 'strikes' in ab_list['playEvents'][n-1]['count'] else None)
-                                balls.append(ab_list['playEvents'][n-1]['count']['balls'] if 'balls' in ab_list['playEvents'][n-1]['count'] else None)
-                                outs.append(ab_list['playEvents'][n-1]['count']['outs'] if 'outs' in ab_list['playEvents'][n-1]['count'] else None)
-    
-                                strikes_after.append(ab_list['playEvents'][n]['count']['strikes'] if 'strikes' in ab_list['playEvents'][n]['count'] else None)
-                                balls_after.append(ab_list['playEvents'][n]['count']['balls'] if 'balls' in ab_list['playEvents'][n]['count'] else None)
-                                outs_after.append(ab_list['playEvents'][n]['count']['outs'] if 'outs' in ab_list['playEvents'][n]['count'] else None)
-    
-    
-                            if 'pitchData' in ab_list['playEvents'][n]:
-    
-                                start_speed.append(ab_list['playEvents'][n]['pitchData']['startSpeed'] if 'startSpeed' in ab_list['playEvents'][n]['pitchData'] else None)
-                                end_speed.append(ab_list['playEvents'][n]['pitchData']['endSpeed'] if 'endSpeed' in ab_list['playEvents'][n]['pitchData'] else None)
-    
-                                sz_top.append(ab_list['playEvents'][n]['pitchData']['strikeZoneTop'] if 'strikeZoneTop' in ab_list['playEvents'][n]['pitchData'] else None)
-                                sz_bot.append(ab_list['playEvents'][n]['pitchData']['strikeZoneBottom'] if 'strikeZoneBottom' in ab_list['playEvents'][n]['pitchData'] else None)
-                                x.append(ab_list['playEvents'][n]['pitchData']['coordinates']['x'] if 'x' in ab_list['playEvents'][n]['pitchData']['coordinates'] else None)
-                                y.append(ab_list['playEvents'][n]['pitchData']['coordinates']['y'] if 'y' in ab_list['playEvents'][n]['pitchData']['coordinates'] else None)
-    
-                                ax.append(ab_list['playEvents'][n]['pitchData']['coordinates']['aX'] if 'aX' in ab_list['playEvents'][n]['pitchData']['coordinates'] else None)
-                                ay.append(ab_list['playEvents'][n]['pitchData']['coordinates']['aY'] if 'aY' in ab_list['playEvents'][n]['pitchData']['coordinates'] else None)
-                                az.append(ab_list['playEvents'][n]['pitchData']['coordinates']['aZ'] if 'aZ' in ab_list['playEvents'][n]['pitchData']['coordinates'] else None)
-                                pfxx.append(ab_list['playEvents'][n]['pitchData']['coordinates']['pfxX'] if 'pfxX' in ab_list['playEvents'][n]['pitchData']['coordinates'] else None)
-                                pfxz.append(ab_list['playEvents'][n]['pitchData']['coordinates']['pfxZ'] if 'pfxZ' in ab_list['playEvents'][n]['pitchData']['coordinates'] else None)
-                                px.append(ab_list['playEvents'][n]['pitchData']['coordinates']['pX'] if 'pX' in ab_list['playEvents'][n]['pitchData']['coordinates'] else None)
-                                pz.append(ab_list['playEvents'][n]['pitchData']['coordinates']['pZ'] if 'pZ' in ab_list['playEvents'][n]['pitchData']['coordinates'] else None)
-                                vx0.append(ab_list['playEvents'][n]['pitchData']['coordinates']['vX0'] if 'vX0' in ab_list['playEvents'][n]['pitchData']['coordinates'] else None)
-                                vy0.append(ab_list['playEvents'][n]['pitchData']['coordinates']['vY0'] if 'vY0' in ab_list['playEvents'][n]['pitchData']['coordinates'] else None)
-                                vz0.append(ab_list['playEvents'][n]['pitchData']['coordinates']['vZ0'] if 'vZ0' in ab_list['playEvents'][n]['pitchData']['coordinates'] else None)
-                                x0.append(ab_list['playEvents'][n]['pitchData']['coordinates']['x0'] if 'x0' in ab_list['playEvents'][n]['pitchData']['coordinates'] else None)
-                                y0.append(ab_list['playEvents'][n]['pitchData']['coordinates']['y0'] if 'y0' in ab_list['playEvents'][n]['pitchData']['coordinates'] else None)
-                                z0.append(ab_list['playEvents'][n]['pitchData']['coordinates']['z0'] if 'z0' in ab_list['playEvents'][n]['pitchData']['coordinates'] else None)
-    
-                                zone.append(ab_list['playEvents'][n]['pitchData']['zone'] if 'zone' in ab_list['playEvents'][n]['pitchData'] else None)
-                                type_confidence.append(ab_list['playEvents'][n]['pitchData']['typeConfidence'] if 'typeConfidence' in ab_list['playEvents'][n]['pitchData'] else None)
-                                plate_time.append(ab_list['playEvents'][n]['pitchData']['plateTime'] if 'plateTime' in ab_list['playEvents'][n]['pitchData'] else None)
-                                extension.append(ab_list['playEvents'][n]['pitchData']['extension'] if 'extension' in ab_list['playEvents'][n]['pitchData'] else None)
-    
-                                if 'breaks' in ab_list['playEvents'][n]['pitchData']:
-                                    spin_rate.append(ab_list['playEvents'][n]['pitchData']['breaks']['spinRate'] if 'spinRate' in ab_list['playEvents'][n]['pitchData']['breaks'] else None)
-                                    spin_direction.append(ab_list['playEvents'][n]['pitchData']['breaks']['spinDirection'] if 'spinDirection' in ab_list['playEvents'][n]['pitchData']['breaks'] else None)
-                                    vb.append(ab_list['playEvents'][n]['pitchData']['breaks']['breakVertical'] if 'breakVertical' in ab_list['playEvents'][n]['pitchData']['breaks'] else None)                               
-                                    ivb.append(ab_list['playEvents'][n]['pitchData']['breaks']['breakVerticalInduced'] if 'breakVerticalInduced' in ab_list['playEvents'][n]['pitchData']['breaks'] else None)
-                                    hb.append(ab_list['playEvents'][n]['pitchData']['breaks']['breakHorizontal'] if 'breakHorizontal' in ab_list['playEvents'][n]['pitchData']['breaks'] else None)
-    
-                            else:
-                                start_speed.append(None)
-                                end_speed.append(None)
-    
-                                sz_top.append(None)
-                                sz_bot.append(None)
-                                x.append(None)
-                                y.append(None)
-    
-                                ax.append(None)
-                                ay.append(None)
-                                az.append(None)
-                                pfxx.append(None)
-                                pfxz.append(None)
-                                px.append(None)
-                                pz.append(None)
-                                vx0.append(None)
-                                vy0.append(None)
-                                vz0.append(None)
-                                x0.append(None)
-                                y0.append(None)
-                                z0.append(None)
-    
-                                zone.append(None)
-                                type_confidence.append(None)
-                                plate_time.append(None)
-                                extension.append(None)
-                                spin_rate.append(None)
-                                spin_direction.append(None)
-                                vb.append(None)
-                                ivb.append(None)
-                                hb.append(None)
+                                game_id.append(data['gamePk'])
+                                game_date.append(data['gameData']['datetime']['officialDate'])
                                 
-    
-                            if 'hitData' in ab_list['playEvents'][n]:
-                                launch_speed.append(ab_list['playEvents'][n]['hitData']['launchSpeed'] if 'launchSpeed' in ab_list['playEvents'][n]['hitData'] else None)
-                                launch_angle.append(ab_list['playEvents'][n]['hitData']['launchAngle'] if 'launchAngle' in ab_list['playEvents'][n]['hitData'] else None)
-                                launch_distance.append(ab_list['playEvents'][n]['hitData']['totalDistance'] if 'totalDistance' in ab_list['playEvents'][n]['hitData'] else None)
-                                launch_location.append(ab_list['playEvents'][n]['hitData']['location'] if 'location' in ab_list['playEvents'][n]['hitData'] else None)
-    
-                                trajectory.append(ab_list['playEvents'][n]['hitData']['trajectory'] if 'trajectory' in ab_list['playEvents'][n]['hitData'] else None)
-                                hardness.append(ab_list['playEvents'][n]['hitData']['hardness'] if 'hardness' in ab_list['playEvents'][n]['hitData'] else None)
-                                hit_x.append(ab_list['playEvents'][n]['hitData']['coordinates']['coordX'] if 'coordX' in ab_list['playEvents'][n]['hitData']['coordinates'] else None)
-                                hit_y.append(ab_list['playEvents'][n]['hitData']['coordinates']['coordY'] if 'coordY' in ab_list['playEvents'][n]['hitData']['coordinates'] else None)
-                            else:
-                                launch_speed.append(None)
-                                launch_angle.append(None)
-                                launch_distance.append(None)
-                                launch_location.append(None)
-                                trajectory.append(None)
-                                hardness.append(None)
-                                hit_x.append(None)
-                                hit_y.append(None)
-    
-                            index_play.append(ab_list['playEvents'][n]['index'] if 'index' in ab_list['playEvents'][n] else None)
-                            play_id.append(ab_list['playEvents'][n]['playId'] if 'playId' in ab_list['playEvents'][n] else None)
-                            start_time.append(ab_list['playEvents'][n]['startTime'] if 'startTime' in ab_list['playEvents'][n] else None)
-                            end_time.append(ab_list['playEvents'][n]['endTime'] if 'endTime' in ab_list['playEvents'][n] else None)
-                            is_pitch.append(ab_list['playEvents'][n]['isPitch'] if 'isPitch' in ab_list['playEvents'][n] else None)
-                            type_type.append(ab_list['playEvents'][n]['type'] if 'type' in ab_list['playEvents'][n] else None)
-    
-    
-    
-                            if n == len(ab_list['playEvents']) - 1 :
-    
-                                type_ab.append(data['liveData']['plays']['allPlays'][ab_id]['result']['type'] if 'type' in data['liveData']['plays']['allPlays'][ab_id]['result'] else None)
-                                event.append(data['liveData']['plays']['allPlays'][ab_id]['result']['event'] if 'event' in data['liveData']['plays']['allPlays'][ab_id]['result'] else None)
-                                event_type.append(data['liveData']['plays']['allPlays'][ab_id]['result']['eventType'] if 'eventType' in data['liveData']['plays']['allPlays'][ab_id]['result'] else None)
-                                rbi.append(data['liveData']['plays']['allPlays'][ab_id]['result']['rbi'] if 'rbi' in data['liveData']['plays']['allPlays'][ab_id]['result'] else None)
-                                away_score.append(data['liveData']['plays']['allPlays'][ab_id]['result']['awayScore'] if 'awayScore' in data['liveData']['plays']['allPlays'][ab_id]['result'] else None)
-                                home_score.append(data['liveData']['plays']['allPlays'][ab_id]['result']['homeScore'] if 'homeScore' in data['liveData']['plays']['allPlays'][ab_id]['result'] else None)
-                                is_out.append(data['liveData']['plays']['allPlays'][ab_id]['result']['isOut'] if 'isOut' in data['liveData']['plays']['allPlays'][ab_id]['result'] else None)
-    
-                            else:
-    
-                                type_ab.append(None)
-                                event.append(None)
-                                event_type.append(None)
-                                rbi.append(None)
-                                away_score.append(None)
-                                home_score.append(None)
-                                is_out.append(None)
-    
-                        elif ab_list['playEvents'][n]['count']['balls'] == 4:
-    
-                            event.append(data['liveData']['plays']['allPlays'][ab_id]['result']['event'])
-                            event_type.append(data['liveData']['plays']['allPlays'][ab_id]['result']['eventType'])
-    
-    
-                            game_id.append(data['gamePk'])
-                            game_date.append(data['gameData']['datetime']['officialDate'])
-                            batter_id.append(ab_list['matchup']['batter']['id'] if 'batter' in ab_list['matchup'] else None)
-                            batter_name.append(ab_list['matchup']['batter']['fullName'] if 'batter' in ab_list['matchup'] else None)
-                            batter_hand.append(ab_list['matchup']['batSide']['code'] if 'batSide' in ab_list['matchup'] else None)
-                            pitcher_id.append(ab_list['matchup']['pitcher']['id'] if 'pitcher' in ab_list['matchup'] else None)
-                            pitcher_name.append(ab_list['matchup']['pitcher']['fullName'] if 'pitcher' in ab_list['matchup'] else None)
-                            pitcher_hand.append(ab_list['matchup']['pitchHand']['code'] if 'pitchHand' in ab_list['matchup'] else None)
-                            if ab_list['about']['isTopInning']:
-                                batter_team.append(data['gameData']['teams']['away']['abbreviation'] if 'away' in data['gameData']['teams'] else None)
-                                batter_team_id.append(data['gameData']['teams']['away']['id'] if 'away' in data['gameData']['teams'] else None)
-                                pitcher_team.append(data['gameData']['teams']['home']['abbreviation'] if 'home' in data['gameData']['teams'] else None)
-                                pitcher_team_id.append(data['gameData']['teams']['away']['id'] if 'away' in data['gameData']['teams'] else None)
-                            else:
-                                batter_team.append(data['gameData']['teams']['home']['abbreviation'] if 'home' in data['gameData']['teams'] else None)
-                                batter_team_id.append(data['gameData']['teams']['home']['id'] if 'home' in data['gameData']['teams'] else None)
-                                pitcher_team.append(data['gameData']['teams']['away']['abbreviation'] if 'away' in data['gameData']['teams'] else None)
-                                pitcher_team_id.append(data['gameData']['teams']['home']['id'] if 'home' in data['gameData']['teams'] else None)
-    
-                            play_description.append(None)
-                            play_code.append(None)
-                            in_play.append(None)
-                            is_strike.append(None)
-                            is_ball.append(None)
-                            is_review.append(None)
-                            pitch_type.append(None)
-                            pitch_description.append(None)
-                            inning.append(None)
-                            strikes.append(ab_list['playEvents'][n]['count']['balls'] if 'balls' in ab_list['playEvents'][n]['count'] else None)
-                            balls.append(ab_list['playEvents'][n]['count']['strikes'] if 'strikes' in ab_list['playEvents'][n]['count'] else None)
-                            outs.append(ab_list['playEvents'][n]['count']['outs'] if 'outs' in ab_list['playEvents'][n]['count'] else None)
-                            strikes_after.append(ab_list['playEvents'][n]['count']['balls'] if 'balls' in ab_list['playEvents'][n]['count'] else None)
-                            balls_after.append(ab_list['playEvents'][n]['count']['strikes'] if 'strikes' in ab_list['playEvents'][n]['count'] else None)
-                            outs_after.append(ab_list['playEvents'][n]['count']['outs'] if 'outs' in ab_list['playEvents'][n]['count'] else None)
-                            index_play.append(ab_list['playEvents'][n]['index'] if 'index' in ab_list['playEvents'][n] else None)
-                            play_id.append(ab_list['playEvents'][n]['playId'] if 'playId' in ab_list['playEvents'][n] else None)
-                            start_time.append(ab_list['playEvents'][n]['startTime'] if 'startTime' in ab_list['playEvents'][n] else None)
-                            end_time.append(ab_list['playEvents'][n]['endTime'] if 'endTime' in ab_list['playEvents'][n] else None)
-                            is_pitch.append(ab_list['playEvents'][n]['isPitch'] if 'isPitch' in ab_list['playEvents'][n] else None)
-                            type_type.append(ab_list['playEvents'][n]['type'] if 'type' in ab_list['playEvents'][n] else None)
-    
-    
-    
-                            is_swing.append(None)
-                            is_whiff.append(None)
-                            start_speed.append(None)
-                            end_speed.append(None)
-                            sz_top.append(None)
-                            sz_bot.append(None)
-                            x.append(None)
-                            y.append(None)
-                            ax.append(None)
-                            ay.append(None)
-                            az.append(None)
-                            pfxx.append(None)
-                            pfxz.append(None)
-                            px.append(None)
-                            pz.append(None)
-                            vx0.append(None)
-                            vy0.append(None)
-                            vz0.append(None)
-                            x0.append(None)
-                            y0.append(None)
-                            z0.append(None)
-                            zone.append(None)
-                            type_confidence.append(None)
-                            plate_time.append(None)
-                            extension.append(None)
-                            spin_rate.append(None)
-                            spin_direction.append(None)
-                            vb.append(None)
-                            ivb.append(None)
-                            hb.append(None)
-                            launch_speed.append(None)
-                            launch_angle.append(None)
-                            launch_distance.append(None)
-                            launch_location.append(None)
-                            trajectory.append(None)
-                            hardness.append(None)
-                            hit_x.append(None)
-                            hit_y.append(None)
-                            type_ab.append(None)
-                            ab_number.append(None)
-    
-                            rbi.append(None)
-                            away_score.append(None)
-                            home_score.append(None)
-                            is_out.append(None)
+                                if 'matchup' in ab_list:
+                                    batter_id.append(ab_list['matchup']['batter']['id'] if 'batter' in ab_list['matchup'] else None)
+                                    if 'batter' in ab_list['matchup']:
+                                        batter_name.append(ab_list['matchup']['batter']['fullName'] if 'fullName' in ab_list['matchup']['batter'] else None)
+                                    else:
+                                        batter_name.append(None)
+                                    batter_hand.append(ab_list['matchup']['batSide']['code'] if 'batSide' in ab_list['matchup'] else None)
+                                    pitcher_id.append(ab_list['matchup']['pitcher']['id'] if 'pitcher' in ab_list['matchup'] else None)
+                                    if 'pitcher' in ab_list['matchup']:
+                                        pitcher_name.append(ab_list['matchup']['pitcher']['fullName'] if 'fullName' in ab_list['matchup']['pitcher'] else None)
+                                    else:
+                                        pitcher_name.append(None)
+                                    pitcher_hand.append(ab_list['matchup']['pitchHand']['code'] if 'pitchHand' in ab_list['matchup'] else None)
+                                else:
+                                    batter_id.append(None)
+                                    batter_name.append(None)
+                                    batter_hand.append(None)
+                                    pitcher_id.append(None)
+                                    pitcher_name.append(None)
+                                    pitcher_hand.append(None)
 
-            except KeyError:
-                print(f"No Data for Game")
-        
-        df  = pl.DataFrame(data={
-            'game_id':game_id,
-            'game_date':game_date,
-            'batter_id':batter_id,
-            'batter_name':batter_name,
-            'batter_hand':batter_hand,
-            'batter_team':batter_team,
-            'batter_team_id':batter_team_id,
-            'pitcher_id':pitcher_id,
-            'pitcher_name':pitcher_name,
-            'pitcher_hand':pitcher_hand,
-            'pitcher_team':pitcher_team,
-            'pitcher_team_id':pitcher_team_id,
-            'ab_number':ab_number,
-            'inning':inning,
-            'play_description':play_description,
-            'play_code':play_code,
-            'in_play':in_play,
-            'is_strike':is_strike,
-            'is_swing':is_swing,
-            'is_whiff':is_whiff,
-            'is_out':is_out,
-            'is_ball':is_ball,
-            'is_review':is_review,
-            'pitch_type':pitch_type,
-            'pitch_description':pitch_description,
-            'strikes':strikes,
-            'balls':balls,
-            'outs':outs,
-            'strikes_after':strikes_after,
-            'balls_after':balls_after,
-            'outs_after':outs_after,            
-            'start_speed':start_speed,
-            'end_speed':end_speed,
-            'sz_top':sz_top,
-            'sz_bot':sz_bot,
-            'x':x,
-            'y':y,
-            'ax':ax,
-            'ay':ay,
-            'az':az,
-            'pfxx':pfxx,
-            'pfxz':pfxz,
-            'px':px,
-            'pz':pz,
-            'vx0':vx0,
-            'vy0':vy0,
-            'vz0':vz0,
-            'x0':x0,
-            'y0':y0,
-            'z0':z0,
-            'zone':zone,
-            'type_confidence':type_confidence,
-            'plate_time':plate_time,
-            'extension':extension,
-            'spin_rate':spin_rate,
-            'spin_direction':spin_direction,
-            'vb':vb,
-            'ivb':ivb,
-            'hb':hb,
-            'launch_speed':launch_speed,
-            'launch_angle':launch_angle,
-            'launch_distance':launch_distance,
-            'launch_location':launch_location,
-            'trajectory':trajectory,
-            'hardness':hardness,
-            'hit_x':hit_x,
-            'hit_y':hit_y,
-            'index_play':index_play,
-            'play_id':play_id,
-            'start_time':start_time,
-            'end_time':end_time,
-            'is_pitch':is_pitch,
-            'type_type':type_type,
-            'type_ab':type_ab,
-            'event':event,
-            'event_type':event_type,
-            'rbi':rbi,
-            'away_score':away_score,
-            'home_score':home_score,
+                                if ab_list['about']['isTopInning']:
+                                    batter_team.append(data['gameData']['teams']['away']['abbreviation'] if 'away' in data['gameData']['teams'] else None)
+                                    batter_team_id.append(data['gameData']['teams']['away']['id'] if 'away' in data['gameData']['teams'] else None)
+                                    pitcher_team.append(data['gameData']['teams']['home']['abbreviation'] if 'home' in data['gameData']['teams'] else None)
+                                    pitcher_team_id.append(data['gameData']['teams']['home']['id'] if 'home' in data['gameData']['teams'] else None)
+                                else:
+                                    batter_team.append(data['gameData']['teams']['home']['abbreviation'] if 'home' in data['gameData']['teams'] else None)
+                                    batter_team_id.append(data['gameData']['teams']['home']['id'] if 'home' in data['gameData']['teams'] else None)
+                                    pitcher_team.append(data['gameData']['teams']['away']['abbreviation'] if 'away' in data['gameData']['teams'] else None)
+                                    pitcher_team_id.append(data['gameData']['teams']['away']['id'] if 'away' in data['gameData']['teams'] else None)
 
-            },strict=False
+                                details = ab_list['playEvents'][n].get('details', {})
+                                play_description.append(details.get('description'))
+                                play_code.append(details.get('code'))
+                                in_play.append(details.get('isInPlay'))
+                                is_strike.append(details.get('isStrike'))
+                                
+                                is_swing.append(True if details.get('code') in swing_list else None)
+                                is_whiff.append(True if details.get('code') in whiff_list else None)
+
+                                inning.append(ab_list['about'].get('inning'))
+                                is_ball.append(details.get('isOut'))
+                                is_review.append(details.get('hasReview'))
+                                
+                                pitch_type.append(details.get('type', {}).get('code') if 'type' in details else None)
+                                pitch_description.append(details.get('type', {}).get('description') if 'type' in details else None)
+
+                                if ab_list['playEvents'][n].get('pitchNumber') == 1:
+                                    strikes.append(0)
+                                    balls.append(0)
+                                    strikes_after.append(ab_list['playEvents'][n]['count']['strikes'] if 'strikes' in ab_list['playEvents'][n].get('count', {}) else None)
+                                    balls_after.append(ab_list['playEvents'][n]['count']['balls'] if 'balls' in ab_list['playEvents'][n].get('count', {}) else None)
+                                    outs.append(ab_list['playEvents'][n]['count']['outs'] if 'outs' in ab_list['playEvents'][n].get('count', {}) else None)
+                                    outs_after.append(ab_list['playEvents'][n]['count']['outs'] if 'outs' in ab_list['playEvents'][n].get('count', {}) else None)
+                                else:
+                                    strikes.append(ab_list['playEvents'][n-1]['count']['strikes'] if 'strikes' in ab_list['playEvents'][n-1].get('count', {}) else None)
+                                    balls.append(ab_list['playEvents'][n-1]['count']['balls'] if 'balls' in ab_list['playEvents'][n-1].get('count', {}) else None)
+                                    outs.append(ab_list['playEvents'][n-1]['count']['outs'] if 'outs' in ab_list['playEvents'][n-1].get('count', {}) else None)
+                                    strikes_after.append(ab_list['playEvents'][n]['count']['strikes'] if 'strikes' in ab_list['playEvents'][n].get('count', {}) else None)
+                                    balls_after.append(ab_list['playEvents'][n]['count']['balls'] if 'balls' in ab_list['playEvents'][n].get('count', {}) else None)
+                                    outs_after.append(ab_list['playEvents'][n]['count']['outs'] if 'outs' in ab_list['playEvents'][n].get('count', {}) else None)
+
+                                if 'pitchData' in ab_list['playEvents'][n]:
+                                    pitch_data = ab_list['playEvents'][n]['pitchData']
+                                    start_speed.append(pitch_data.get('startSpeed'))
+                                    end_speed.append(pitch_data.get('endSpeed'))
+                                    sz_top.append(pitch_data.get('strikeZoneTop'))
+                                    sz_bot.append(pitch_data.get('strikeZoneBottom'))
+                                    
+                                    coords = pitch_data.get('coordinates', {})
+                                    x.append(coords.get('x'))
+                                    y.append(coords.get('y'))
+                                    ax.append(coords.get('aX'))
+                                    ay.append(coords.get('aY'))
+                                    az.append(coords.get('aZ'))
+                                    pfxx.append(coords.get('pfxX'))
+                                    pfxz.append(coords.get('pfxZ'))
+                                    px.append(coords.get('pX'))
+                                    pz.append(coords.get('pZ'))
+                                    vx0.append(coords.get('vX0'))
+                                    vy0.append(coords.get('vY0'))
+                                    vz0.append(coords.get('vZ0'))
+                                    x0.append(coords.get('x0'))
+                                    y0.append(coords.get('y0'))
+                                    z0.append(coords.get('z0'))
+
+                                    zone.append(pitch_data.get('zone'))
+                                    type_confidence.append(pitch_data.get('typeConfidence'))
+                                    plate_time.append(pitch_data.get('plateTime'))
+                                    extension.append(pitch_data.get('extension'))
+
+                                    if 'breaks' in pitch_data:
+                                        breaks = pitch_data['breaks']
+                                        spin_rate.append(breaks.get('spinRate'))
+                                        spin_direction.append(breaks.get('spinDirection'))
+                                        vb.append(breaks.get('breakVertical'))
+                                        ivb.append(breaks.get('breakVerticalInduced'))
+                                        hb.append(breaks.get('breakHorizontal'))
+                                    else:
+                                        spin_rate.append(None)
+                                        spin_direction.append(None)
+                                        vb.append(None)
+                                        ivb.append(None)
+                                        hb.append(None)
+
+                                else:
+                                    start_speed.append(None)
+                                    end_speed.append(None)
+                                    sz_top.append(None)
+                                    sz_bot.append(None)
+                                    x.append(None)
+                                    y.append(None)
+                                    ax.append(None)
+                                    ay.append(None)
+                                    az.append(None)
+                                    pfxx.append(None)
+                                    pfxz.append(None)
+                                    px.append(None)
+                                    pz.append(None)
+                                    vx0.append(None)
+                                    vy0.append(None)
+                                    vz0.append(None)
+                                    x0.append(None)
+                                    y0.append(None)
+                                    z0.append(None)
+                                    zone.append(None)
+                                    type_confidence.append(None)
+                                    plate_time.append(None)
+                                    extension.append(None)
+                                    spin_rate.append(None)
+                                    spin_direction.append(None)
+                                    vb.append(None)
+                                    ivb.append(None)
+                                    hb.append(None)
+
+                                if 'hitData' in ab_list['playEvents'][n]:
+                                    hit_data = ab_list['playEvents'][n]['hitData']
+                                    launch_speed.append(hit_data.get('launchSpeed'))
+                                    launch_angle.append(hit_data.get('launchAngle'))
+                                    launch_distance.append(hit_data.get('totalDistance'))
+                                    launch_location.append(hit_data.get('location'))
+                                    trajectory.append(hit_data.get('trajectory'))
+                                    hardness.append(hit_data.get('hardness'))
+                                    hit_coords = hit_data.get('coordinates', {})
+                                    hit_x.append(hit_coords.get('coordX'))
+                                    hit_y.append(hit_coords.get('coordY'))
+                                else:
+                                    launch_speed.append(None)
+                                    launch_angle.append(None)
+                                    launch_distance.append(None)
+                                    launch_location.append(None)
+                                    trajectory.append(None)
+                                    hardness.append(None)
+                                    hit_x.append(None)
+                                    hit_y.append(None)
+
+                                index_play.append(ab_list['playEvents'][n].get('index'))
+                                play_id.append(ab_list['playEvents'][n].get('playId'))
+                                start_time.append(ab_list['playEvents'][n].get('startTime'))
+                                end_time.append(ab_list['playEvents'][n].get('endTime'))
+                                is_pitch.append(ab_list['playEvents'][n].get('isPitch'))
+                                type_type.append(ab_list['playEvents'][n].get('type'))
+
+                                # Handle result fields - only populate on last event
+                                if n == len(ab_list['playEvents']) - 1:
+                                    type_ab.append(ab_result.get('type'))
+                                    event.append(ab_result.get('event'))
+                                    event_type.append(ab_result.get('eventType'))
+                                    rbi.append(ab_result.get('rbi'))
+                                    away_score.append(ab_result.get('awayScore'))
+                                    home_score.append(ab_result.get('homeScore'))
+                                    is_out.append(ab_result.get('isOut'))
+                                else:
+                                    type_ab.append(None)
+                                    event.append(None)
+                                    event_type.append(None)
+                                    rbi.append(None)
+                                    away_score.append(None)
+                                    home_score.append(None)
+                                    is_out.append(None)
+
+                except KeyError as e:
+                    print(f"No Data for Game: {e}")
+            
+            df = pl.DataFrame(data={
+                'game_id':game_id,
+                'game_date':game_date,
+                'batter_id':batter_id,
+                'batter_name':batter_name,
+                'batter_hand':batter_hand,
+                'batter_team':batter_team,
+                'batter_team_id':batter_team_id,
+                'pitcher_id':pitcher_id,
+                'pitcher_name':pitcher_name,
+                'pitcher_hand':pitcher_hand,
+                'pitcher_team':pitcher_team,
+                'pitcher_team_id':pitcher_team_id,
+                'ab_number':ab_number,
+                'inning':inning,
+                'play_description':play_description,
+                'play_code':play_code,
+                'in_play':in_play,
+                'is_strike':is_strike,
+                'is_swing':is_swing,
+                'is_whiff':is_whiff,
+                'is_out':is_out,
+                'is_ball':is_ball,
+                'is_review':is_review,
+                'pitch_type':pitch_type,
+                'pitch_description':pitch_description,
+                'strikes':strikes,
+                'balls':balls,
+                'outs':outs,
+                'strikes_after':strikes_after,
+                'balls_after':balls_after,
+                'outs_after':outs_after,            
+                'start_speed':start_speed,
+                'end_speed':end_speed,
+                'sz_top':sz_top,
+                'sz_bot':sz_bot,
+                'x':x,
+                'y':y,
+                'ax':ax,
+                'ay':ay,
+                'az':az,
+                'pfxx':pfxx,
+                'pfxz':pfxz,
+                'px':px,
+                'pz':pz,
+                'vx0':vx0,
+                'vy0':vy0,
+                'vz0':vz0,
+                'x0':x0,
+                'y0':y0,
+                'z0':z0,
+                'zone':zone,
+                'type_confidence':type_confidence,
+                'plate_time':plate_time,
+                'extension':extension,
+                'spin_rate':spin_rate,
+                'spin_direction':spin_direction,
+                'vb':vb,
+                'ivb':ivb,
+                'hb':hb,
+                'launch_speed':launch_speed,
+                'launch_angle':launch_angle,
+                'launch_distance':launch_distance,
+                'launch_location':launch_location,
+                'trajectory':trajectory,
+                'hardness':hardness,
+                'hit_x':hit_x,
+                'hit_y':hit_y,
+                'index_play':index_play,
+                'play_id':play_id,
+                'start_time':start_time,
+                'end_time':end_time,
+                'is_pitch':is_pitch,
+                'type_type':type_type,
+                'type_ab':type_ab,
+                'event':event,
+                'event_type':event_type,
+                'rbi':rbi,
+                'away_score':away_score,
+                'home_score':home_score,
+                },strict=False
             )
 
-        return df
+            return df
 
+    
     def get_teams(self):
         """
         Retrieves information about MLB teams from the MLB API and processes it into a Polars DataFrame.
@@ -863,7 +774,6 @@ class MLB_Scrape:
             batter_data = requests.get(f'https://bdfed.stitch.mlbinfra.com/bdfed/stats/player?&env=prod&season={season}&sportId=1&stats=season&group=hitting&gameType=S&limit=1000000&offset=0').json()
             fullName_list = [x['playerFullName'] for x in batter_data['stats']]
             firstName_list = [x['playerFirstName'] for x in batter_data['stats']]
-            useName_list = [x['useName'] for x in player_data]
             lastName_list = [x['playerLastName'] for x in batter_data['stats']]
             id_list = [x['playerId'] for x in batter_data['stats']]
             position_list = [x['primaryPositionAbbrev'] for x in batter_data['stats']]
@@ -872,7 +782,6 @@ class MLB_Scrape:
             df_batter = pl.DataFrame(data={
                 'player_id': id_list,
                 'first_name': firstName_list,
-                'use_name': useName_list,
                 'last_name': lastName_list,
                 'name': fullName_list,
                 'position': position_list,
@@ -889,7 +798,6 @@ class MLB_Scrape:
             # Extract relevant data
             fullName_list = [x['fullName'] for x in player_data]
             firstName_list = [x['firstName'] for x in player_data]
-            useName_list = [x['useName'] for x in player_data]
             lastName_list = [x['lastName'] for x in player_data]
             id_list = [x['id'] for x in player_data]
             position_list = [x['primaryPosition']['abbreviation'] if 'primaryPosition' in x else None for x in player_data]
@@ -902,7 +810,6 @@ class MLB_Scrape:
             df = pl.DataFrame(data={
                 'player_id': id_list,
                 'first_name': firstName_list,
-                'use_name': useName_list,
                 'last_name': lastName_list,
                 'name': fullName_list,
                 'position': position_list,
@@ -914,4 +821,3 @@ class MLB_Scrape:
             })
                 
         return df
-
