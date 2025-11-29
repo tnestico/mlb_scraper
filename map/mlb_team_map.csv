@@ -1,31 +1,31 @@
-team_id,fg_team_id,franchise,abbreviation,parent_org_id,primary_color,secondary_color
-108,1,Los Angeles Angels,LAA,108,#BA0021,#003263
-109,15,Arizona Diamondbacks,AZ,109,#A71930,#3EC1CD
-110,2,Baltimore Orioles,BAL,110,#DF4601,#000000
-111,3,Boston Red Sox,BOS,111,#BD3039,#0D2B56
-112,17,Chicago Cubs,CHC,112,#0E3386,#CC3433
-113,18,Cincinnati Reds,CIN,113,#C6011F,#000000
-114,5,Cleveland Guardians,CLE,114,#0C2340,#E31937
-115,19,Colorado Rockies,COL,115,#33006F,#C4CED4
-116,6,Detroit Tigers,DET,116,#0C2340,#FA4616
-117,21,Houston Astros,HOU,117,#002D62,#EB6E1F
-118,7,Kansas City Royals,KC,118,#004687,#BD9B60
-119,22,Los Angeles Dodgers,LAD,119,#005A9C,#FFFFFF
-120,24,Washington Nationals,WSH,120,#AB0003,#14225A
-121,25,New York Mets,NYM,121,#002D72,#FF5910
-133,10,Athletics,ATH,133,#003831,#EFB21E
-134,27,Pittsburgh Pirates,PIT,134,#FDB827,#27251F
-135,29,San Diego Padres,SD,135,#2F241D,#FFC425
-136,11,Seattle Mariners,SEA,136,#0C2C56,#005C5C
-137,30,San Francisco Giants,SF,137,#FD5A1E,#27251F
-138,28,St. Louis Cardinals,STL,138,#C41E3A,#FEDB00
-139,12,Tampa Bay Rays,TB,139,#092C5C,#8FBCE6
-140,13,Texas Rangers,TEX,140,#003278,#C0111F
-141,14,Toronto Blue Jays,TOR,141,#134A8E,#FFFFFF
-142,8,Minnesota Twins,MIN,142,#002B5C,#D31145
-143,26,Philadelphia Phillies,PHI,143,#E81828,#002D72
-144,16,Atlanta Braves,ATL,144,#13274F,#CE1141
-145,4,Chicago White Sox,CWS,145,#27251F,#C4CED4
-146,20,Miami Marlins,MIA,146,#00A3E0,#EF3340
-147,9,New York Yankees,NYY,147,#142448,#C4CED4
-158,23,Milwaukee Brewers,MIL,158,#12284b,#FFC52F
+team_id,fg_team_id,franchise,name,abbreviation,parent_org_id,primary_color,secondary_color
+108,1,Los Angeles Angels,Angels,LAA,108,#BA0021,#003263
+109,15,Arizona Diamondbacks,Diamondbacks,AZ,109,#A71930,#3EC1CD
+110,2,Baltimore Orioles,Orioles,BAL,110,#DF4601,#000000
+111,3,Boston Red Sox,Red Sox,BOS,111,#BD3039,#0D2B56
+112,17,Chicago Cubs,Cubs,CHC,112,#0E3386,#CC3433
+113,18,Cincinnati Reds,Reds,CIN,113,#C6011F,#000000
+114,5,Cleveland Guardians,Guardians,CLE,114,#0C2340,#E31937
+115,19,Colorado Rockies,Rockies,COL,115,#33006F,#C4CED4
+116,6,Detroit Tigers,Tigers,DET,116,#0C2340,#FA4616
+117,21,Houston Astros,Astros,HOU,117,#002D62,#EB6E1F
+118,7,Kansas City Royals,Royals,KC,118,#004687,#BD9B60
+119,22,Los Angeles Dodgers,Dodgers,LAD,119,#005A9C,#FFFFFF
+120,24,Washington Nationals,Nationals,WSH,120,#AB0003,#14225A
+121,25,New York Mets,Mets,NYM,121,#002D72,#FF5910
+133,10,Athletics,Athletics,ATH,133,#003831,#EFB21E
+134,27,Pittsburgh Pirates,Pirates,PIT,134,#FDB827,#27251F
+135,29,San Diego Padres,Padres,SD,135,#2F241D,#FFC425
+136,11,Seattle Mariners,Mariners,SEA,136,#0C2C56,#005C5C
+137,30,San Francisco Giants,Giants,SF,137,#FD5A1E,#27251F
+138,28,St. Louis Cardinals,Cardinals,STL,138,#C41E3A,#FEDB00
+139,12,Tampa Bay Rays,Rays,TB,139,#092C5C,#8FBCE6
+140,13,Texas Rangers,Rangers,TEX,140,#003278,#C0111F
+141,14,Toronto Blue Jays,Blue Jays,TOR,141,#134A8E,#FFFFFF
+142,8,Minnesota Twins,Twins,MIN,142,#002B5C,#D31145
+143,26,Philadelphia Phillies,Phillies,PHI,143,#E81828,#002D72
+144,16,Atlanta Braves,Braves,ATL,144,#13274F,#CE1141
+145,4,Chicago White Sox,White Sox,CWS,145,#27251F,#C4CED4
+146,20,Miami Marlins,Marlins,MIA,146,#00A3E0,#EF3340
+147,9,New York Yankees,Yankees,NYY,147,#142448,#C4CED4
+158,23,Milwaukee Brewers,Brewers,MIL,158,#12284b,#FFC52F
