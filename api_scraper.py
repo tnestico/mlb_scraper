@@ -306,14 +306,92 @@ class MLB_Scrape:
 
             for data in data_list:
                 try:
+                    players_lookup = data.get('gameData', {}).get('players', {})
+                    pitcher_of_record = {}
+
                     for ab_id in range(len(data['liveData']['plays']['allPlays'])):
                         ab_list = data['liveData']['plays']['allPlays'][ab_id]
                         
                         # Extract result data once per at-bat
                         ab_result = ab_list.get('result', {})
-                        
+
+                        # Track current pitcher/batter accounting for mid-AB substitutions
+                        matchup = ab_list.get('matchup', {})
+                        is_top = ab_list['about']['isTopInning']
+                        pitching_side = 'home' if is_top else 'away'
+
+                        # Initialize pitcher from tracker (previous AB) or matchup
+                        if pitching_side in pitcher_of_record:
+                            cur_pitcher_id = pitcher_of_record[pitching_side]['id']
+                            cur_pitcher_name = pitcher_of_record[pitching_side]['name']
+                            cur_pitcher_hand = pitcher_of_record[pitching_side]['hand']
+                        else:
+                            cur_pitcher_id = matchup.get('pitcher', {}).get('id')
+                            cur_pitcher_name = matchup.get('pitcher', {}).get('fullName')
+                            cur_pitcher_hand = matchup.get('pitchHand', {}).get('code')
+
+                        # Initialize batter from matchup
+                        cur_batter_id = matchup.get('batter', {}).get('id')
+                        cur_batter_name = matchup.get('batter', {}).get('fullName')
+                        cur_batter_hand = matchup.get('batSide', {}).get('code')
+
+                        # Pre-scan for mid-AB substitutions to find original players
+                        for evt in ab_list['playEvents']:
+                            evt_type = evt.get('details', {}).get('eventType', '')
+                            if evt_type == 'pitching_substitution' and 'player' in evt:
+                                # matchup shows the NEW pitcher; restore original from tracker or description
+                                if pitching_side not in pitcher_of_record:
+                                    desc = evt.get('details', {}).get('description', '')
+                                    if ' replaces ' in desc:
+                                        replaced_name = desc.split(' replaces ')[-1].rstrip('.')
+                                        for p_info in players_lookup.values():
+                                            if isinstance(p_info, dict) and p_info.get('fullName') == replaced_name:
+                                                cur_pitcher_id = p_info.get('id')
+                                                cur_pitcher_name = p_info.get('fullName')
+                                                cur_pitcher_hand = p_info.get('pitchHand', {}).get('code')
+                                                break
+                                break
+
+                        for evt in ab_list['playEvents']:
+                            evt_type = evt.get('details', {}).get('eventType', '')
+                            if evt_type == 'offensive_substitution' and 'player' in evt:
+                                new_id = evt['player']['id']
+                                if new_id == matchup.get('batter', {}).get('id'):
+                                    # matchup shows the substitute; restore original from description
+                                    desc = evt.get('details', {}).get('description', '')
+                                    if ' replaces ' in desc:
+                                        replaced_name = desc.split(' replaces ')[-1].rstrip('.')
+                                        for p_info in players_lookup.values():
+                                            if isinstance(p_info, dict) and p_info.get('fullName') == replaced_name:
+                                                cur_batter_id = p_info.get('id')
+                                                cur_batter_name = p_info.get('fullName')
+                                                cur_batter_hand = p_info.get('batSide', {}).get('code')
+                                                break
+                                    break
+
                         for n in range(len(ab_list['playEvents'])):
-                            
+
+                            # Update pitcher/batter on mid-AB substitutions
+                            evt_type = ab_list['playEvents'][n].get('details', {}).get('eventType', '')
+                            if evt_type == 'pitching_substitution' and 'player' in ab_list['playEvents'][n]:
+                                new_id = ab_list['playEvents'][n]['player']['id']
+                                p_info = players_lookup.get(f'ID{new_id}', {})
+                                cur_pitcher_id = new_id
+                                cur_pitcher_name = p_info.get('fullName')
+                                cur_pitcher_hand = p_info.get('pitchHand', {}).get('code')
+                            elif evt_type == 'pitcher_switch' and 'player' in ab_list['playEvents'][n]:
+                                # Switch-pitcher changing hands — same pitcher, update hand
+                                switch_id = ab_list['playEvents'][n]['player']['id']
+                                p_info = players_lookup.get(f'ID{switch_id}', {})
+                                cur_pitcher_hand = p_info.get('pitchHand', {}).get('code')
+                            elif evt_type == 'offensive_substitution' and 'player' in ab_list['playEvents'][n]:
+                                new_id = ab_list['playEvents'][n]['player']['id']
+                                if new_id == matchup.get('batter', {}).get('id'):
+                                    p_info = players_lookup.get(f'ID{new_id}', {})
+                                    cur_batter_id = new_id
+                                    cur_batter_name = p_info.get('fullName')
+                                    cur_batter_hand = p_info.get('batSide', {}).get('code')
+
                             # Determine if this event should be recorded
                             is_pitch_or_call = ab_list['playEvents'][n].get('isPitch') == True or 'call' in ab_list['playEvents'][n].get('details', {})
                             is_walk = 'count' in ab_list['playEvents'][n] and ab_list['playEvents'][n]['count'].get('balls') == 4
@@ -324,26 +402,12 @@ class MLB_Scrape:
                                 game_id.append(data['gamePk'])
                                 game_date.append(data['gameData']['datetime']['officialDate'])
                                 
-                                if 'matchup' in ab_list:
-                                    batter_id.append(ab_list['matchup']['batter']['id'] if 'batter' in ab_list['matchup'] else None)
-                                    if 'batter' in ab_list['matchup']:
-                                        batter_name.append(ab_list['matchup']['batter']['fullName'] if 'fullName' in ab_list['matchup']['batter'] else None)
-                                    else:
-                                        batter_name.append(None)
-                                    batter_hand.append(ab_list['matchup']['batSide']['code'] if 'batSide' in ab_list['matchup'] else None)
-                                    pitcher_id.append(ab_list['matchup']['pitcher']['id'] if 'pitcher' in ab_list['matchup'] else None)
-                                    if 'pitcher' in ab_list['matchup']:
-                                        pitcher_name.append(ab_list['matchup']['pitcher']['fullName'] if 'fullName' in ab_list['matchup']['pitcher'] else None)
-                                    else:
-                                        pitcher_name.append(None)
-                                    pitcher_hand.append(ab_list['matchup']['pitchHand']['code'] if 'pitchHand' in ab_list['matchup'] else None)
-                                else:
-                                    batter_id.append(None)
-                                    batter_name.append(None)
-                                    batter_hand.append(None)
-                                    pitcher_id.append(None)
-                                    pitcher_name.append(None)
-                                    pitcher_hand.append(None)
+                                batter_id.append(cur_batter_id)
+                                batter_name.append(cur_batter_name)
+                                batter_hand.append(cur_batter_hand)
+                                pitcher_id.append(cur_pitcher_id)
+                                pitcher_name.append(cur_pitcher_name)
+                                pitcher_hand.append(cur_pitcher_hand)
 
                                 if ab_list['about']['isTopInning']:
                                     batter_team.append(data['gameData']['teams']['away']['abbreviation'] if 'away' in data['gameData']['teams'] else None)
@@ -505,6 +569,13 @@ class MLB_Scrape:
                                     away_score.append(None)
                                     home_score.append(None)
                                     is_out.append(None)
+
+                        # Update pitcher tracker at end of at-bat
+                        pitcher_of_record[pitching_side] = {
+                            'id': cur_pitcher_id,
+                            'name': cur_pitcher_name,
+                            'hand': cur_pitcher_hand
+                        }
 
                 except KeyError as e:
                     print(f"No Data for Game: {e}")
@@ -827,4 +898,5 @@ class MLB_Scrape:
             })
                 
         return df
+
 
